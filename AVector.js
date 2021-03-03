@@ -111,6 +111,18 @@ AVector.prototype = {
         }
         return this;
     },
+    limitX: function(a) {
+        if (typeof a == "number" && Math.abs(this.x) > a) {
+            this.x = a * Math.sign(this.x);
+        }
+        return this;
+    },
+    limitY: function(a) {
+        if (typeof a == "number" && Math.abs(this.y) > a) {
+            this.y = a * Math.sign(this.y);
+        }
+        return this;
+    },
     dot: function(v, a="manual_y") {
         if (v instanceof AVector) {
             return this.x * v.x + this.y * v.y;
@@ -141,6 +153,14 @@ AVector.prototype = {
 
     set: function(x, y) {
         this.x = x;
+        this.y = y;
+        return this;
+    },
+    setX: function(x) {
+        this.x = x;
+        return this;
+    },
+    setY: function(y) {
         this.y = y;
         return this;
     },

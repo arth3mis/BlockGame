@@ -1,25 +1,6 @@
-const canvas = document.getElementById("canvas");
-const cx = canvas.getContext("2d");
-
-// user settings
-const settings = {
-    dimension: new AVector(0,0),
-    dimensions: [[1920,1080], [1280,720], [800,600]],
-    dimensionChoice: 1,
-    fullscreen: false,
-}
-let noBrowserFullscreenExit = false;
-
-const keybindings = {
-    toggleSettings: "Tab",
-    toggleFullscreen: "f",
-}
-
-// canvas setup
-let canvasPosition = canvas.getBoundingClientRect();
-settings.dimension.set(settings.dimensions[settings.dimensionChoice][0], settings.dimensions[settings.dimensionChoice][1]);
-canvas.width = settings.dimension.x;
-canvas.height = settings.dimension.y;
+let menuInstance;
+let gameInstance = new Game();
+let settingsInstance;
 
 const gameStates = {
     inGame: "inGame",
@@ -28,10 +9,6 @@ const gameStates = {
 }
 let gameState = gameStates.inGame;
 let prevGameState = gameStates.mainMenu;
-
-let menuInstance;
-let gameInstance = new Game();
-let settingsInstance;
 
 const mouse = {
     pos: new AVector(0,0),
@@ -42,101 +19,51 @@ const mouse = {
 canvas.addEventListener("mousemove", function(e) {
     mouse.pos.set(e.x, e.y);
 });
-
-// time calculation
-const tickLength = 1000 / 10;
-let tickBuffer = 0;
-let gameTime = 0;
-
-const timeStep = 1000 / 60;
-const panicThreshold = 4 * 1000 / timeStep;
-let panicsCount = 0;
-let timeLastFrame = 0;
-let timeDelta = 0;
-
-// fps
-let lastCheck = 0;
-let checks = 0;
-let drawFPS = 0;
-
-// main loop
-function animate(timestamp) {
-    // -----------------------------------------------------------------------------------------------------------------
-
-    cx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // update and draw
-    timeDelta += timestamp - timeLastFrame;
-    let updateCount = 0;
-    while (timeDelta >= timeStep) {
-        update(timeStep, gameTime);
-        timeDelta -= timeStep;
-        if (++updateCount >= panicThreshold) {
-            panic();
-            timeDelta = 0;
-            tickBuffer = 0;
-            timeLastFrame = timestamp;
-            break;
-        }
+canvas.addEventListener("mousedown", function(e) {
+    if (e.button === 0) {
+        mouse.lmb = true;
+    } else if (e.button === 1) {
+        mouse.mmb = true;
+    } else if (e.button === 2) {
+        mouse.rmb = true;
     }
-    draw();
-
-    // game time
-    tickBuffer += timestamp - timeLastFrame;
-    while (tickBuffer > tickLength) {
-        gameTime++;
-        tickBuffer -= tickLength;
+});
+canvas.addEventListener("mouseup", function(e) {
+    if (e.button === 0) {
+        mouse.lmb = false;
+    } else if (e.button === 1) {
+        mouse.mmb = false;
+    } else if (e.button === 2) {
+        mouse.rmb = false;
     }
+});
 
-    timeLastFrame = timestamp;
-
-    // todo dev fps
-    checks++;
-    if (checks > 20) {
-        drawFPS = Math.round(checks/((Date.now() - lastCheck)/1000.0));
-        lastCheck = Date.now();
-        checks = 0;
-    }
-    cx.font = "40px Arial";
-    cx.fillStyle = "black";
-    cx.fillText(drawFPS + " fps; "+gameState+"; "+gameTime, 10, canvas.height-20);
-
-    // -----------------------------------------------------------------------------------------------------------------
-    requestAnimationFrame(animate);
-}
-requestAnimationFrame(animate);
-
-function update(delta, time) {
-    switch (gameState) {
-        case "inGame":
-            gameInstance.update(delta, time);
-            break;
-    }
+const keybindings = {
+    toggleSettings: "t",
+    toggleFullscreen: "f",
+    moveUp: "w",
+    moveLeft: "a",
+    moveDown: "s",
+    moveRight: "d",
+    jump: " ",
 }
 
-function draw() {
-    switch (gameState) {
-        case "inGame":
-            gameInstance.draw();
-            break;
-    }
+const keyboard = {
+    moveUp: false,
+    moveLeft: false,
+    moveDown: false,
+    moveRight: false,
+    jump: false,
 }
-
-function panic() {
-    panicsCount++;
-    alert("Timeout - Click OK to continue the game");
-}
-
-// universal listeners
 window.addEventListener("keydown", function(e) {
     const key = e.key;
     // open/close settings
     if (key === keybindings.toggleSettings) {
         if (gameState === gameStates.settingsMenu) {
+            gameState = prevGameState;
+        } else {
             prevGameState = gameState;
             gameState = gameStates.settingsMenu;
-        } else {
-            gameState = prevGameState;
         }
     }
     // toggle fullscreen
@@ -147,6 +74,55 @@ window.addEventListener("keydown", function(e) {
             document.documentElement.requestFullscreen();
         } else {
             document.exitFullscreen();
+        }
+    }
+    // control
+    if (gameState === gameStates.inGame) {
+        if (key === keybindings.moveUp && !keyboard.moveUp) {
+            keyboard.moveUp = true;
+        }
+        if (key === keybindings.moveLeft && !keyboard.moveLeft) {
+            keyboard.moveLeft = true;
+            gameInstance.player.acc.sub(gameInstance.player.accLR,0);
+        }
+        if (key === keybindings.moveDown && !keyboard.moveDown) {
+            keyboard.moveDown = true;
+        }
+        if (key === keybindings.moveRight && !keyboard.moveRight) {
+            keyboard.moveRight = true;
+            gameInstance.player.acc.add(gameInstance.player.accLR,0);
+        }
+        if (key === keybindings.jump) {
+            if (!keyboard.jump && !gameInstance.player.jumped && !gameInstance.player.inAir) {
+                gameInstance.player.vel.add(0, gameInstance.player.jumpVel);
+                gameInstance.player.jumped = true;
+                gameInstance.player.inAir = true;
+            }
+            keyboard.jump = true;
+        }
+    }
+});
+
+window.addEventListener("keyup", function(e) {
+    let key = e.key;
+    // control
+    if (gameState === gameStates.inGame) {
+        if (key === keybindings.moveUp) {
+            keyboard.moveUp = false;
+        }
+        if (key === keybindings.moveLeft) {
+            keyboard.moveLeft = false;
+            gameInstance.player.acc.add(gameInstance.player.accLR,0);
+        }
+        if (key === keybindings.moveDown) {
+            keyboard.moveDown = false;
+        }
+        if (key === keybindings.moveRight) {
+            keyboard.moveRight = false;
+            gameInstance.player.acc.sub(gameInstance.player.accLR,0);
+        }
+        if (key === keybindings.jump) {
+            keyboard.jump = false;
         }
     }
 });

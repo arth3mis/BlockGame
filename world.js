@@ -8,7 +8,10 @@ class World {
         } else {
             this.load();
         }
-        this.background = 0;
+        this.background = cx.createLinearGradient(0, 0, 0, canvas.height);
+        this.background.addColorStop(0, "rgb(157,176,174)");
+        this.background.addColorStop(0.4, "rgb(109,121,120)");
+        this.background.addColorStop(1, "rgb(86,93,93)");
     }
 
     load() {
@@ -17,7 +20,7 @@ class World {
 
     generate() {
         this.blockGrid = new Array(worldSize.x);
-        for (let i = 0; i < this.blockGrid.length; i++) {
+        for (let i = 0; i < worldSize.x; i++) {
             this.blockGrid[i] = new Array(worldSize.y);
             for (let j = 0; j < worldSize.y * 0.25; j++) {
                 this.blockGrid[i][j] = new Block(0);

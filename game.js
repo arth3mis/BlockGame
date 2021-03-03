@@ -8,6 +8,9 @@ class Game {
     }
 
     draw() {
+        cx.fillStyle = this.world.background;
+        cx.fillRect(0, 0, canvas.width, canvas.height);
+
 
     }
 }

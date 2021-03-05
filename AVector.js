@@ -112,13 +112,13 @@ AVector.prototype = {
         return this;
     },
     limitX: function(a) {
-        if (typeof a == "number" && Math.abs(this.x) > a) {
+        if (typeof a == "number" && Math.abs(this.x) > Math.abs(a)) {
             this.x = a * Math.sign(this.x);
         }
         return this;
     },
     limitY: function(a) {
-        if (typeof a == "number" && Math.abs(this.y) > a) {
+        if (typeof a == "number" && Math.abs(this.y) > Math.abs(a)) {
             this.y = a * Math.sign(this.y);
         }
         return this;

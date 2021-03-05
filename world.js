@@ -1,4 +1,4 @@
-const worldSize = new AVector(16, 9);
+const worldSize = new AVector(30, 25);
 const blockSize = canvas.height / settings.blocksInHeight;
 
 class World {
@@ -32,8 +32,13 @@ class World {
                 this.blockGrid[i][j] = new Block(0);
             }
             for (let j = Math.floor(worldSize.y * 0.6); j < worldSize.y; j++) {
-                this.blockGrid[i][j] = new Block(1);
+                if (i<20) this.blockGrid[i][j] = new Block(1);
+                else this.blockGrid[i][j] = new Block(0);
             }
         }
+        this.blockGrid[3][Math.floor(worldSize.y * 0.6)] = new Block(0);
+        this.blockGrid[4][Math.floor(worldSize.y * 0.6)] = new Block(0);
+        this.blockGrid[10][Math.floor(worldSize.y * 0.6)-1] = new Block(1);
+        this.blockGrid[14][Math.floor(worldSize.y * 0.6)-4] = new Block(1);
     }
 }

@@ -8,7 +8,7 @@ const settings = {
     dimensions: [[1920,1080], [1280,720], [800,600]],
     dimensionChoice: 1,
     fullscreen: false,
-    blocksInHeight: 9,
+    blocksInHeight: 25,
 }
 let noBrowserFullscreenExit = false;
 

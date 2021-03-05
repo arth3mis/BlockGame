@@ -53,8 +53,7 @@ function animate(timestamp) {
     }
     cx.font = "40px Arial";
     cx.fillStyle = "black";
-    cx.fillText(drawFPS + " fps; "+Math.floor(gameTime/100)+"; "+gameInstance.player.vel.x+"; "+gameInstance.player.acc.x
-        , 10, canvas.height-20);
+    cx.fillText(drawFPS + " fps; "+Math.floor(gameTime/100)+"; "+gameInstance.player.inAir+"; "+gameInstance.player.pos.x, 10, canvas.height-20);
 
     // -----------------------------------------------------------------------------------------------------------------
     requestAnimationFrame(animate);

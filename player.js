@@ -38,7 +38,7 @@ class Player {
 
         // movement
         this.vel.add(AVector.mult(this.acc, T * (this.inAir ? this.accXFactorInAir : 1), T));
-        // braking
+        // brake x
         let sign = Math.sign(this.vel.x);
         if (sign !== Math.sign(this.acc.x)) {
             this.vel.add(this.accLR * T * -sign * (this.inAir ? this.brakeXFactorInAir : this.brakeXFactor), 0);
@@ -51,10 +51,12 @@ class Player {
         if (this.jumping && gameTime - this.jumpTime < this.jumpTimeout) {
             this.vel.setY(this.jumpVel);
         }
+        // brake fall
         if (this.vel.y > this.maxVelFall) {
             this.vel.y = this.maxVelFall;
         }
 
+        let prePos = this.pos.clone();
         this.pos.add(AVector.mult(this.vel, T));
 
         // collision
@@ -113,48 +115,106 @@ class Player {
         } else if (this.pos.y - this.radius < 0) {
             this.pos.setY(this.radius);
         } else {
-            // top block
-            let blockTopY = Math.round(this.pos.y - this.radius) - 1;
-            if (blockTopY >= 0 && this.wld.blockGrid[Math.floor(this.pos.x)][blockTopY].id !== 0) {
-                if (this.pos.y - this.radius <= blockTopY + 1) {
-                    this.stopY(blockTopY + 1 + this.radius, true);
-                }
-            } /*else if (blockTopY >= 0) {
-                let xRange = [Math.floor(this.pos.x - this.radius), Math.floor(this.pos.x + this.radius)];
-                for (let i = xRange[0]; i <= xRange[1]; i++) {
-                    if (i >= 0 && i < worldSize.x && this.wld.blockGrid[i][blockTopY].id !== 0) {
-                        // check where player hits a corner, get yDiff between pos.y and y of corner
-                        let xDiff = this.pos.x - i - (i < this.pos.x ? 1 : 0);
-                        let yDiff = Math.sqrt(this.radius * this.radius - xDiff * xDiff);
-                        if (this.pos.y - yDiff <= blockTopY) {
-                            this.stopY(blockTopY + yDiff);
-                        }
-                    }
-                }
-            }*/ else {
-                // bottom block
-                let blockBottomY = Math.round(this.pos.y + this.radius);
-                if (blockBottomY < worldSize.y && this.wld.blockGrid[Math.floor(this.pos.x)][blockBottomY].id !== 0) {
-                    if (this.pos.y + this.radius >= blockBottomY) {
-                        this.stopY(blockBottomY - this.radius);
-                    }
-                } else if (blockBottomY < worldSize.y) {
-                    let xRange = [Math.floor(this.pos.x - this.radius), Math.floor(this.pos.x + this.radius)];
-                    for (let i = xRange[0]; i <= xRange[1]; i++) {
-                        if (i >= 0 && i < worldSize.x && this.wld.blockGrid[i][blockBottomY].id !== 0) {
-                            // check where player hits a corner, get yDiff between pos.y and y of corner
-                            let xDiff = this.pos.x - i - (i < this.pos.x ? 1 : 0);
-                            let yDiff = Math.sqrt(this.radius * this.radius - xDiff * xDiff);
-                            if (this.pos.y + yDiff >= blockBottomY) {
-                                this.stopY(blockBottomY - yDiff);
-                                if (Math.abs(xDiff) > this.radius / 2) {
-                                    //this.vel.add(xDiff * this.velEdgePushFactor, 0);  todo dev re-add after finding land glitch bug
+            let collided = false;
+            // circle collision
+            let xRange = [Math.floor(prePos.x - this.radius), Math.floor(this.pos.x + this.radius)];
+            let yRange = [Math.floor(prePos.y - this.radius), Math.floor(this.pos.y + this.radius)];
+            for (let xBlock = xRange[0]; xBlock <= xRange[1]; xBlock++) {
+                if (0 <= xBlock && xBlock < worldSize.x) {
+                    for (let yBlock = yRange[1]; yBlock >= yRange[0]; yBlock--) {
+                        if (0 <= yBlock && yBlock < worldSize.y) {
+                            if (this.wld.blockGrid[xBlock][yBlock].id !== 0) {
+                                let xDiff = this.pos.x - xBlock - (xBlock < this.pos.x ? 1 : 0);
+                                let yDiff = Math.sqrt(this.radius * this.radius - xDiff * xDiff);
+                                let top = prePos.y > this.pos.y;
+                                if (Math.abs(this.pos.y - yBlock - (top ? 1 : 0)) <= yDiff) {
+                                    this.stopY(yBlock - yDiff * (top ? -1 : 1) + (top ? 1 : 0), top);
                                 }
                             }
                         }
                     }
                 }
             }
+            // block directly below player
+            if (!collided) {
+                let midXBlocks = [Math.ceil(prePos.y + this.radius), Math.floor(this.pos.y + this.radius)];
+                // go from bottom to top to put player as high as possible (esp. if they skipped blocks)
+                for (let yBlock = Math.max(midXBlocks[1], midXBlocks[0]); yBlock >= Math.min(midXBlocks[0], midXBlocks[1]); yBlock--) {
+                    if (0 <= yBlock && yBlock < worldSize.y) {
+                        if (this.wld.blockGrid[Math.floor(this.pos.x)][yBlock].id !== 0) {
+                            if (yBlock - this.pos.y <= this.radius) {
+                                this.stopY(yBlock - this.radius);
+                            }
+                        }
+                    }
+                }
+            }
+            // block directly above player
+            if (!collided) {
+                let midXBlocks = [Math.ceil(prePos.y - this.radius), Math.floor(this.pos.y - this.radius)];
+                for (let yBlock = Math.min(midXBlocks[1], midXBlocks[0]); yBlock <= Math.max(midXBlocks[0], midXBlocks[1]); yBlock++) {
+                    if (0 <= yBlock && yBlock < worldSize.y && this.wld.blockGrid[Math.floor(this.pos.x)][yBlock].id !== 0) {
+                        if (this.pos.y - yBlock - 1 <= this.radius) {
+                            this.stopY(yBlock + 1 + this.radius, true);
+                        }
+                    }
+                }
+            }
+
+
+
+
+//            // top block
+//            let blockTopY = Math.round(this.pos.y - this.radius) - 1;
+//            if (blockTopY >= 0 && this.wld.blockGrid[Math.floor(this.pos.x)][blockTopY].id !== 0) {
+//                if (this.pos.y - this.radius <= blockTopY + 1) {
+//                    this.stopY(blockTopY + 1 + this.radius, true);
+//                }
+//            } /*else if (blockTopY >= 0) {
+//                let xRange = [Math.floor(this.pos.x - this.radius), Math.floor(this.pos.x + this.radius)];
+//                for (let i = xRange[0]; i <= xRange[1]; i++) {
+//                    if (i >= 0 && i < worldSize.x && this.wld.blockGrid[i][blockTopY].id !== 0) {
+//                        // check where player hits a corner, get yDiff between pos.y and y of corner
+//                        let xDiff = this.pos.x - i - (i < this.pos.x ? 1 : 0);
+//                        let yDiff = Math.sqrt(this.radius * this.radius - xDiff * xDiff);
+//                        if (this.pos.y - yDiff <= blockTopY) {
+//                            this.stopY(blockTopY + yDiff);
+//                        }
+//                    }
+//                }
+//            }*/ else {
+//                // bottom block
+//                let blockBottomY = Math.ceil(this.pos.y);
+//                // block skipped?
+//                if (this.pos.y - prePos.y >= 1) {
+//                    console.log("stop1", blockBottomY, this.pos.y, this.pos.y - prePos.y)
+//                    if (this.wld.blockGrid[Math.floor(this.pos.x)][blockBottomY - Math.floor(this.pos.y - prePos.y)].id !== 0) {
+//                        this.stopY(blockBottomY - Math.floor(this.pos.y - prePos.y) - this.radius);
+//                    }
+//                }
+//
+//                if (blockBottomY < worldSize.y && this.wld.blockGrid[Math.floor(this.pos.x)][blockBottomY].id !== 0) {
+//                    console.log("stop2", blockBottomY, this.pos.y, this.pos.y - prePos.y)
+//                    if (this.pos.y + this.radius >= blockBottomY) {
+//                        this.stopY(blockBottomY - this.radius);
+//                    }
+//                } else if (blockBottomY < worldSize.y) {
+//                    let xRange = [Math.floor(this.pos.x - this.radius), Math.floor(this.pos.x + this.radius)];
+//                    for (let i = xRange[0]; i <= xRange[1]; i++) {
+//                        if (i >= 0 && i < worldSize.x && this.wld.blockGrid[i][blockBottomY].id !== 0) {
+//                            // check where player hits a corner, get yDiff between pos.y and y of corner
+//                            let xDiff = this.pos.x - i - (i < this.pos.x ? 1 : 0);
+//                            let yDiff = Math.sqrt(this.radius * this.radius - xDiff * xDiff);
+//                            if (this.pos.y + yDiff >= blockBottomY) {
+//                                this.stopY(blockBottomY - yDiff);
+//                                if (Math.abs(xDiff) > this.radius / 2) {
+//                                    //this.vel.add(xDiff * this.velEdgePushFactor, 0);  todo dev re-add after finding land glitch bug
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//            }
         }
     }
 

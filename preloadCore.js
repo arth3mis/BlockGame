@@ -9,6 +9,8 @@ const settings = {
     dimensionChoice: 1,
     fullscreen: false,
     blocksInHeight: 25,
+    updatesPerSecond: 60,
+    displayFps: true,
 }
 let noBrowserFullscreenExit = false;
 

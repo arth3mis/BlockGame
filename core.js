@@ -94,11 +94,9 @@ window.addEventListener("keydown", function(e) {
         }
         if (key === keybindings.jump) {
             if (!keyboard.jump && !gameInstance.player.jumped && !gameInstance.player.inAir) {
-                //gameInstance.player.vel.add(0, gameInstance.player.jumpVel);
                 gameInstance.player.jumpTime = gameTime;
                 gameInstance.player.jumped = true;
                 gameInstance.player.jumping = true;
-                //gameInstance.player.inAir = true;
             }
             keyboard.jump = true;
         }

@@ -41,9 +41,14 @@ class World {
 
         this.blockGrid[19][Math.floor(worldSize.y * 0.6)] = new Block(0);
 
-        this.blockGrid[10][Math.floor(worldSize.y * 0.6)-1] = new Block(1);
+        this.blockGrid[9][Math.floor(worldSize.y * 0.6)-1] = new Block(1);
 
-        this.blockGrid[14][Math.floor(worldSize.y * 0.6)-4] = new Block(1);
+        //this.blockGrid[12][Math.floor(worldSize.y * 0.6)-1] = new Block(1);
+        this.blockGrid[12][Math.floor(worldSize.y * 0.6)-2] = new Block(1);
+
+        this.blockGrid[16][Math.floor(worldSize.y * 0.6)-4] = new Block(1);
+
+        this.blockGrid[19][Math.floor(worldSize.y * 0.6)+5] = new Block(0);
 
         this.blockGrid[23][worldSize.y-7] = new Block(1);
         this.blockGrid[24][worldSize.y-7] = new Block(1);

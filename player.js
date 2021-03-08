@@ -68,6 +68,51 @@ class Player {
             this.pos.setX(worldSize.x - this.radius);
             this.vel.setX(0);
         } else {
+            // circle collision
+            /*let xRange = [Math.floor(prePos.x - this.radius), Math.floor(this.pos.x + this.radius)];
+            let yRange = [Math.floor(prePos.y - this.radius), Math.floor(this.pos.y + this.radius)];
+            for (let yBlock = yRange[0]; yBlock <= yRange[1]; yBlock++) {
+                if (0 <= yBlock && yBlock < worldSize.y) {
+                    for (let xBlock = xRange[1]; xBlock >= xRange[0]; xBlock--) {
+                        if (0 <= xBlock && xBlock < worldSize.x) {
+                            if (this.wld.blockGrid[xBlock][yBlock].id !== 0) {
+                                let yDiff = this.pos.y - yBlock - (yBlock < this.pos.y ? 1 : 0);
+                                let xDiff = Math.sqrt(this.radius * this.radius - yDiff * yDiff);
+                                let right = prePos.x > this.pos.x;
+                                if (Math.abs(this.pos.x - xBlock - (right ? 1 : 0)) < xDiff) {
+                                    this.stopX(xBlock - xDiff * (right ? -1 : 1) + (right ? 1 : 0));
+                                }
+                            }
+                        }
+                    }
+                }
+            }*/
+            // block right of player
+            let midYBlocks = [Math.ceil(prePos.x + this.radius), Math.floor(this.pos.x + this.radius)];
+            // go from right to left to put player as left as possible (esp. if they skipped blocks)
+            for (let xBlock = Math.max(midYBlocks[1], midYBlocks[0]); xBlock >= Math.min(midYBlocks[0], midYBlocks[1]); xBlock--) {
+                if (0 <= xBlock && xBlock < worldSize.x) {
+                    if (this.wld.blockGrid[xBlock][Math.floor(this.pos.y)].id !== 0 ||
+                        (this.wld.blockGrid[xBlock][Math.floor(this.pos.y) - 1].id !== 0 && this.wld.blockGrid[xBlock][Math.floor(this.pos.y) + 1].id !== 0)) {
+                        if (xBlock - this.pos.x <= this.radius) {
+                            this.stopX(xBlock - this.radius);
+                        }
+                    }
+                }
+            }
+            // block left of player
+            midYBlocks = [Math.ceil(prePos.x - this.radius), Math.floor(this.pos.x - this.radius)];
+            for (let xBlock = Math.min(midYBlocks[1], midYBlocks[0]); xBlock <= Math.max(midYBlocks[0], midYBlocks[1]); xBlock++) {
+                if (0 <= xBlock && xBlock < worldSize.x) {
+                    if (this.wld.blockGrid[xBlock][Math.floor(this.pos.y)].id !== 0 ||
+                        (this.wld.blockGrid[xBlock][Math.floor(this.pos.y) - 1].id !== 0 && this.wld.blockGrid[xBlock][Math.floor(this.pos.y) + 1].id !== 0)) {
+                        if (this.pos.x - xBlock - 1 <= this.radius) {
+                            this.stopX(xBlock + 1 + this.radius);
+                        }
+                    }
+                }
+            }
+
 //            // left block
 //            let blockLeftX = Math.round(this.pos.x - this.radius) - 1;
 //            if (blockLeftX >= 0 && this.wld.blockGrid[blockLeftX][Math.floor(this.pos.y)].id !== 0) {
@@ -115,7 +160,34 @@ class Player {
         } else if (this.pos.y - this.radius < 0) {
             this.pos.setY(this.radius);
         } else {
-            let collided = false;
+            let bStop = -1, tStop = -1;
+
+
+            // block directly below player
+            let midXBlocks = [Math.ceil(prePos.y + this.radius), Math.floor(this.pos.y + this.radius)];
+            // go from bottom to top to put player as high as possible (esp. if they skipped blocks)
+            for (let yBlock = Math.max(midXBlocks[1], midXBlocks[0]); yBlock >= Math.min(midXBlocks[0], midXBlocks[1]); yBlock--) {
+                if (0 <= yBlock && yBlock < worldSize.y) {
+                    if (this.wld.blockGrid[Math.floor(this.pos.x)][yBlock].id !== 0) {
+                        if (yBlock - this.pos.y <= this.radius) {
+                            //this.stopY(yBlock - this.radius);
+                            bStop = yBlock - this.radius;
+                        }
+                    }
+                }
+            }
+
+            // block directly above player
+            midXBlocks = [Math.ceil(prePos.y - this.radius), Math.floor(this.pos.y - this.radius)];
+            for (let yBlock = Math.min(midXBlocks[1], midXBlocks[0]); yBlock <= Math.max(midXBlocks[0], midXBlocks[1]); yBlock++) {
+                if (0 <= yBlock && yBlock < worldSize.y && this.wld.blockGrid[Math.floor(this.pos.x)][yBlock].id !== 0) {
+                    if (this.pos.y - yBlock - 1 <= this.radius) {
+                        //this.stopY(yBlock + 1 + this.radius, true);
+                        tStop = yBlock + 1 + this.radius;
+                    }
+                }
+            }
+
             // circle collision
             let xRange = [Math.floor(prePos.x - this.radius), Math.floor(this.pos.x + this.radius)];
             let yRange = [Math.floor(prePos.y - this.radius), Math.floor(this.pos.y + this.radius)];
@@ -130,37 +202,24 @@ class Player {
                                 if (Math.abs(this.pos.y - yBlock - (top ? 1 : 0)) <= yDiff) {
                                     this.stopY(yBlock - yDiff * (top ? -1 : 1) + (top ? 1 : 0), top);
                                 }
+                                /*yDiff = this.pos.y - yBlock - (yBlock < this.pos.y ? 1 : 0);
+                                xDiff = Math.sqrt(this.radius * this.radius - yDiff * yDiff);
+                                let left = prePos.x > this.pos.x;
+                                if (yBlock < this.pos.y && Math.abs(this.pos.x - xBlock - (left ? 1 : 0)) <= xDiff) {
+                                    this.stopX(xBlock - xDiff * (left ? -1 : 1) + (left ? 1 : 0));
+                                }*/
                             }
-                        }
-                    }
-                }
-            }
-            // block directly below player
-            if (!collided) {
-                let midXBlocks = [Math.ceil(prePos.y + this.radius), Math.floor(this.pos.y + this.radius)];
-                // go from bottom to top to put player as high as possible (esp. if they skipped blocks)
-                for (let yBlock = Math.max(midXBlocks[1], midXBlocks[0]); yBlock >= Math.min(midXBlocks[0], midXBlocks[1]); yBlock--) {
-                    if (0 <= yBlock && yBlock < worldSize.y) {
-                        if (this.wld.blockGrid[Math.floor(this.pos.x)][yBlock].id !== 0) {
-                            if (yBlock - this.pos.y <= this.radius) {
-                                this.stopY(yBlock - this.radius);
-                            }
-                        }
-                    }
-                }
-            }
-            // block directly above player
-            if (!collided) {
-                let midXBlocks = [Math.ceil(prePos.y - this.radius), Math.floor(this.pos.y - this.radius)];
-                for (let yBlock = Math.min(midXBlocks[1], midXBlocks[0]); yBlock <= Math.max(midXBlocks[0], midXBlocks[1]); yBlock++) {
-                    if (0 <= yBlock && yBlock < worldSize.y && this.wld.blockGrid[Math.floor(this.pos.x)][yBlock].id !== 0) {
-                        if (this.pos.y - yBlock - 1 <= this.radius) {
-                            this.stopY(yBlock + 1 + this.radius, true);
                         }
                     }
                 }
             }
 
+            if (bStop !== -1) {
+                this.stopY(bStop);
+            }
+            if (tStop !== -1) {
+                this.stopY(tStop, true);
+            }
 
 
 

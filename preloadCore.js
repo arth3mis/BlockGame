@@ -5,7 +5,7 @@ const resPath = "res/";
 // user settings
 const settings = {
     dimension: new AVector(0,0),
-    dimensions: [[1920,1080], [1280,720], [800,600]],
+    dimensions: [[1920,1080], [1280,720], [800,600], [640,480]],
     dimensionChoice: 1,
     fullscreen: false,
     blocksInHeight: 25,

@@ -1,5 +1,13 @@
+class Menu {
+    constructor() {
 
+    }
 
-function handleMainMenu() {
+    update(delta) {
 
+    }
+
+    draw() {
+
+    }
 }

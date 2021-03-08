@@ -45,7 +45,7 @@ function animate(timestamp) {
     timeLastFrame = timestamp;
 
     // todo dev fps
-    if (settings.displayFps) {
+    if (gameState === gameStates.inGame && settings.displayFps) {
         checks++;
         if (checks > 20) {
             drawFPS = Math.round(checks/((Date.now() - lastCheck)/1000.0));
@@ -76,6 +76,9 @@ function update(delta) {
         case "inGame":
             gameInstance.update(delta);
             break;
+        case "settingsMenu":
+            settingsInstance.update(delta);
+            break;
     }
 }
 
@@ -83,6 +86,10 @@ function draw() {
     switch (gameState) {
         case "inGame":
             gameInstance.draw();
+            break;
+        case "settingsMenu":
+            gameInstance.draw();
+            settingsInstance.draw();
             break;
     }
 }

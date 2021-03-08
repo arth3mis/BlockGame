@@ -1,6 +1,6 @@
 let menuInstance;
+let settingsInstance = new Settings();
 let gameInstance = new Game();
-let settingsInstance;
 
 const gameStates = {
     inGame: "inGame",

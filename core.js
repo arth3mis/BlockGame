@@ -1,4 +1,4 @@
-let menuInstance;
+let menuInstance = new Menu();
 let settingsInstance = new Settings();
 let gameInstance = new Game();
 
@@ -93,10 +93,14 @@ window.addEventListener("keydown", function(e) {
             gameInstance.player.acc.add(gameInstance.player.accLR,0);
         }
         if (key === keybindings.jump) {
-            if (!keyboard.jump && !gameInstance.player.jumped && !gameInstance.player.inAir) {
+            if (!keyboard.jump && !gameInstance.player.jumped &&
+                (!gameInstance.player.inAir || gameTime - gameInstance.player.inAirStart < gameInstance.player.inAirJumpDelay)) {
                 gameInstance.player.jumpTime = gameTime;
                 gameInstance.player.jumped = true;
                 gameInstance.player.jumping = true;
+                if (!gameInstance.player.firstJumped) {
+                    gameInstance.player.firstJumped = true;
+                }
             }
             keyboard.jump = true;
         }

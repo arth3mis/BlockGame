@@ -88,7 +88,11 @@ function draw() {
             gameInstance.draw();
             break;
         case "settingsMenu":
-            gameInstance.draw();
+            if (prevGameState === gameStates.inGame) {
+                gameInstance.draw();
+            } else if (prevGameState === gameStates.mainMenu) {
+                menuInstance.draw();
+            }
             settingsInstance.draw();
             break;
     }

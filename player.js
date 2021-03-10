@@ -4,19 +4,21 @@ class Player {
 
         this.gravity = 50;
 
-        this.pos = new AVector(8, 4);
+        this.pos = new AVector(23, 19);
         this.vel = new AVector(0, 0);
         this.acc = new AVector(0, this.gravity);
 
-        this.accLR = 15;
-        this.maxVelX = 9;
-        this.brakeXFactor = 3.5;
+        this.accLR = 16;
+        this.maxVelX = 10;
+        this.brakeXFactor = 2;
         this.accXFactorInAir = 0.7;
         this.brakeXFactorInAir = 1;
-        this.edgePushFactor = 2;
-        this.edgePush = 0;
 
-        this.jumpVel = -12;
+        this.edgePush = 0;
+        this.edgePushFactor = 2;
+        this.edgePushThreshold = 0.1;
+
+        this.jumpVel = -15;
         this.jumpTime = 0;
         this.jumpTimeout = 300;
         this.jumping = false;
@@ -25,9 +27,11 @@ class Player {
         this.inAir = false;
         this.inAirStart = 0;
         this.inAirJumpDelay = 70;
-        this.maxVelFall = 30;
 
-        this.radius = 0.75;
+        this.maxVelFall = 30;
+        this.hitTopVelLimit = 10;
+
+        this.radius = 0.75;  // must be below 1 (collision is not fail-proof for every size)
 
         this.color = "rgb(94,248,245)"
         //this.colorH = 0;
@@ -37,11 +41,12 @@ class Player {
 
     update(delta) {
         const T = delta / timeUnit;
-        //this.colorH = (this.colorH + 360/this.colorCycleTime * delta/tickLength) % 360;
+        //this.colorH = (this.colorH + 360/this.colorCycleTime * T) % 360;
         //this.color = "hsl("+Math.round(this.colorH)+",70%,55%)"
 
         // movement
         this.vel.add(AVector.mult(this.acc, T * (this.inAir ? this.accXFactorInAir : 1), T));
+
         // brake x
         let sign = Math.sign(this.vel.x);
         if (sign !== Math.sign(this.acc.x)) {
@@ -51,22 +56,24 @@ class Player {
             }
         }
         this.vel.limitX(this.maxVelX);
+
         // push off edge
-        if (!keyboard.moveLeft && !keyboard.moveRight) {
+        if (!keyboard.moveLeft && !keyboard.moveRight && Math.abs(this.edgePush / this.edgePushFactor) > this.edgePushThreshold) {
             this.vel.add(this.edgePush, Math.abs(this.edgePush));
-            this.edgePush = 0;
         }
+        this.edgePush = 0;
+
         // jumping
         if (this.jumping && gameTime - this.jumpTime < this.jumpTimeout) {
             this.vel.setY(this.jumpVel);
         }
+
         // brake fall
         if (this.vel.y > this.maxVelFall) {
             this.vel.y = this.maxVelFall;
         }
 
         let prePos = this.pos.clone();
-
         this.pos.add(AVector.mult(this.vel, T));
 
         // collision
@@ -79,13 +86,12 @@ class Player {
             this.vel.setX(0);
         } else {
             // block right of player
-            let midYBlocks = [Math.ceil(prePos.x + this.radius), Math.floor(this.pos.x + this.radius)];
+            let midYBlocks = [Math.floor(prePos.x + this.radius), Math.floor(this.pos.x + this.radius)];
             // go from right to left to put player as left as possible (esp. if they skipped blocks)
             for (let xBlock = Math.max(midYBlocks[1], midYBlocks[0]); xBlock >= Math.min(midYBlocks[0], midYBlocks[1]); xBlock--) {
                 if (0 <= xBlock && xBlock < worldSize.x) {
                     let yBlock = Math.floor(this.pos.y);
-                    if (this.wld.blockGrid[xBlock][yBlock].id !== 0 ||
-                        (this.wld.blockGrid[xBlock][Math.max(yBlock - 1, 0)].id !== 0 && this.wld.blockGrid[xBlock][Math.min(yBlock + 1, worldSize.y - 1)].id !== 0)) {
+                    if (this.collisionX(xBlock, yBlock, true)) {
                         if (xBlock - this.pos.x <= this.radius) {
                             this.stopX(xBlock - this.radius);
                         }
@@ -93,12 +99,11 @@ class Player {
                 }
             }
             // block left of player
-            midYBlocks = [Math.ceil(prePos.x - this.radius), Math.floor(this.pos.x - this.radius)];
+            midYBlocks = [Math.floor(prePos.x - this.radius), Math.floor(this.pos.x - this.radius)];
             for (let xBlock = Math.min(midYBlocks[1], midYBlocks[0]); xBlock <= Math.max(midYBlocks[0], midYBlocks[1]); xBlock++) {
                 if (0 <= xBlock && xBlock < worldSize.x) {
-                    let yBlock = Math.floor(this.pos.y);
-                    if (this.wld.blockGrid[xBlock][Math.floor(this.pos.y)].id !== 0 ||
-                        (this.wld.blockGrid[xBlock][Math.max(yBlock - 1, 0)].id !== 0 && this.wld.blockGrid[xBlock][Math.min(yBlock + 1, worldSize.y - 1)].id !== 0)) {
+                    let yBlock = Math.min(worldSize.y-1, Math.max(0, Math.floor(this.pos.y)));
+                    if (this.collisionX(xBlock, yBlock, false)) {
                         if (this.pos.x - xBlock - 1 <= this.radius) {
                             this.stopX(xBlock + 1 + this.radius);
                         }
@@ -113,6 +118,7 @@ class Player {
             this.stopY(worldSize.y - this.radius);
         } else if (this.pos.y - this.radius < 0) {
             this.pos.setY(this.radius);
+            this.vel.limitY(this.hitTopVelLimit);
         } else {
             let bStop = -1, tStop = -1;
             // block directly below player
@@ -147,10 +153,10 @@ class Player {
                                 let xDiff = this.pos.x - xBlock - (xBlock < this.pos.x ? 1 : 0);
                                 let yDiff = Math.sqrt(this.radius * this.radius - xDiff * xDiff);
                                 let top = prePos.y > this.pos.y;
-                                if (Math.abs(this.pos.y - yBlock - (top ? 1 : 0)) <= yDiff) {
+                                if (Math.abs(this.pos.y - yBlock - (top ? 1 : 0)) < yDiff) {
                                     this.stopY(yBlock - yDiff * (top ? -1 : 1) + (top ? 1 : 0), top);
                                     if (Math.abs(xDiff) > this.radius / 5) {
-                                        this.edgePush = xDiff * this.edgePushFactor;
+                                        this.edgePush += xDiff * this.edgePushFactor;
                                     }
                                 }
                             }
@@ -160,13 +166,40 @@ class Player {
             }
             if (bStop !== -1) {
                 this.stopY(bStop);
+                this.edgePush = 0;
             }
             if (tStop !== -1) {
                 this.stopY(tStop, true);
             }
         }
+
         if (this.inAir && this.inAirStart === -1) {
             this.inAirStart = gameTime;
+        }
+    }
+
+    collisionX(x, y, toRight) {
+        if (y <= 0) {
+            return this.wld.blockGrid[x][0].id !== 0 || this.wld.blockGrid[x][1].id !== 0;
+        }
+        if (0 < y && y < worldSize.y - 1) {
+            if (this.wld.blockGrid[x][y].id !== 0) {    // O☐   case a
+                //console.log("a")
+                return true;
+            } else if (this.wld.blockGrid[x][y-1].id !== 0) {
+                if (this.wld.blockGrid[x + (toRight ? -1 : 1)][y+1].id !== 0) {     //  ☐ y-1   case b1
+                    //console.log("b1")                                             // O
+                    return true;                                                    // ☐ x-1 (if toRight)
+                } else if (this.wld.blockGrid[x][y+1].id !== 0) {   //  ☐ y-1   case b2
+                    //console.log("b2")                             // O
+                    return true;                                    //  ☐ y+1
+                }
+            } else if (this.wld.blockGrid[x][y+1].id !== 0 && this.wld.blockGrid[x + (toRight ? -1 : 1)][y-1].id !== 0) {   // case b1 with reverse y
+                return true;
+            }
+        }
+        if (y >= worldSize.y - 1) {
+            return this.wld.blockGrid[x][worldSize.y-1].id !== 0 || this.wld.blockGrid[x][worldSize.y-2].id !== 0;
         }
     }
 

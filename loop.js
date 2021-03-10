@@ -54,16 +54,18 @@ function animate(timestamp) {
         }
         cx.font = "40px Arial";
         cx.fillStyle = "black";
-        cx.fillText(/*drawFPS + " fps; "+Math.floor(gameTime/100)+"; "+*/Math.round(gameInstance.player.pos.x*1000)/1000+"", 40, canvas.height-80);
-        cx.fillText(/*drawFPS + " fps; "+Math.floor(gameTime/100)+"; "+*/Math.round(gameInstance.player.pos.y*1000)/1000+"", 40, canvas.height-40);
+        cx.fillText(drawFPS + " fps; "+Math.floor(gameTime/100)
+            +"; "+Math.round(gameInstance.player.pos.x*100)/100
+            +"; "+Math.round(gameInstance.player.pos.y*100)/100
+            , 20, canvas.height-20);
 
-        cx.font = "20px Arial";
+        /*cx.font = "20px Arial";
         for (let i = 0; i < settings.blocksInHeight; i++) {
             cx.fillText(i+"", 3, (i+1)*blockSize - 7);
         }
         for (let i = 1; i < worldSize.x; i++) {
             cx.fillText(i+"", i * blockSize + 2, canvas.height - 7);
-        }
+        }*/
     }
 
     // -----------------------------------------------------------------------------------------------------------------

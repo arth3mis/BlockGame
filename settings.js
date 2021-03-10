@@ -18,15 +18,15 @@ class Settings {
         let w = h * this.widthP;
 
         cx.lineWidth = 25;
+        cx.strokeStyle = "rgb(37,60,74)";
+        cx.fillStyle = "rgb(63,136,176)";
         cx.beginPath();
         cx.moveTo(xm - w/2, ym - h/2);
         cx.lineTo(xm + w/2, ym - h/2);
         cx.lineTo(xm + w/2, ym + h/2);
         cx.lineTo(xm - w/2, ym + h/2);
         cx.lineTo(xm - w/2, ym - h/2 - cx.lineWidth/2);
-        cx.fillStyle = "rgb(41,71,90)";
         cx.stroke();
-        cx.fillStyle = "rgb(63,136,176)";
         cx.fill();
     }
 }

@@ -3,12 +3,21 @@ class Settings {
         this.heightP = 0.7;  // percentage of dimension height
         this.widthP = 0.8;  // percentage of heightP
 
-        this.stdScale = new AVector(0.6, 0.2);  // percentage of this.size
+        this.stdButtonScale = new AVector(0.6, 0.2);  // percentage of this.size
         this.dimensionButton = [0, 1, 1];  // position, xScale, yScale
     }
 
     update(delta) {
-
+        if (mouse.lmbTriggered) {
+            if (mouse.lmbTriggerPos.y > canvas.height/2) {
+                settings.dimensionChoice = 0;
+            } else {
+                settings.dimensionChoice = 1;
+            }
+            setFrameSize();
+            updateBlockSize();
+            mouse.lmbTriggered = false;
+        }
     }
 
     draw() {

@@ -15,7 +15,12 @@ const settings = {
 let noBrowserFullscreenExit = false;
 
 // canvas setup
-let canvasPosition = canvas.getBoundingClientRect();
-settings.dimension.set(settings.dimensions[settings.dimensionChoice][0], settings.dimensions[settings.dimensionChoice][1]);
-canvas.width = settings.dimension.x;
-canvas.height = settings.dimension.y;
+let canvasPosition;
+
+function setFrameSize() {
+    settings.dimension.set(settings.dimensions[settings.dimensionChoice][0], settings.dimensions[settings.dimensionChoice][1]);
+    canvas.width = settings.dimension.x;
+    canvas.height = settings.dimension.y;
+    canvasPosition = canvas.getBoundingClientRect();
+}
+setFrameSize();

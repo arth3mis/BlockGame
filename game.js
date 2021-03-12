@@ -31,7 +31,6 @@ class Game {
         cx.fillRect(0, 0, canvas.width, canvas.height);
 
         // draw world that is on screen
-        console.log(this.playerScreenPos.x/blockSize)
         for (let i = Math.max(0, Math.floor(this.player.pos.x - this.playerScreenPos.x/blockSize));
              i <= Math.min(worldSize.x-1, Math.floor(this.player.pos.x + (canvas.width-this.playerScreenPos.x)/blockSize)); i++) {
             for (let j = Math.max(0, Math.floor(this.player.pos.y - this.playerScreenPos.y/blockSize));
@@ -40,6 +39,16 @@ class Game {
                     cx.drawImage(this.world.blockSprite[this.world.blockGrid[i][j].id - 1], this.playerScreenPos.x + (i - this.player.pos.x) * blockSize, this.playerScreenPos.y + (j - this.player.pos.y) * blockSize, blockSize, blockSize);
                 }
             }
+        }
+
+        // todo dev
+        if (mouse.lmb) {
+            cx.lineWidth = 2;
+            cx.strokeStyle = "black";
+            cx.beginPath();
+            cx.moveTo(this.playerScreenPos.x, this.playerScreenPos.y);
+            cx.lineTo(mouse.pos.x, mouse.pos.y);
+            cx.stroke();
         }
 
         cx.fillStyle = this.player.color;

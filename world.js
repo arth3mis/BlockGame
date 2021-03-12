@@ -1,5 +1,10 @@
 const worldSize = new AVector(100, 40);
-const blockSize = canvas.height / settings.blocksInHeight;
+
+let blockSize;
+function updateBlockSize() {
+    blockSize = canvas.height / settings.blocksInHeight;
+}
+updateBlockSize();
 
 class World {
     constructor(save) {

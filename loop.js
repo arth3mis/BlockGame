@@ -3,7 +3,7 @@ const timeUnit = 1000;  // 1000 -> speed values etc. are "per second"
 let gameTime = 0;
 
 let timeStep = 1000 / 60;
-let panicThreshold = 4 * 1000 / timeStep;
+let panicThreshold = 4 * 1000 / timeStep;  // panics if 4*60 updates are queued
 let panicsCount = 0;
 let timeLastFrame = 0;
 let timeDelta = 0;
@@ -54,9 +54,9 @@ function animate(timestamp) {
         }
         cx.font = "40px Arial";
         cx.fillStyle = "black";
-        cx.fillText(drawFPS + " fps; "+Math.floor(gameTime/100)
-            +"; "+Math.round(gameInstance.player.pos.x*100)/100
-            +"; "+Math.round(gameInstance.player.pos.y*100)/100
+        cx.fillText(drawFPS + " fps; "+Math.floor(gameTime/100)+"; "+blockSize
+            +"; "+Math.round(mouse.pos.x*100)/100
+            +"; "+Math.round(mouse.pos.y*100)/100
             , 20, canvas.height-20);
 
         /*cx.font = "20px Arial";

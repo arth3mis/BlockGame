@@ -4,7 +4,7 @@ class Player {
 
         this.gravity = 50;
 
-        this.pos = new AVector(23, 19);
+        this.pos = new AVector(40, 30);
         this.vel = new AVector(0, 0);
         this.acc = new AVector(0, this.gravity);
 

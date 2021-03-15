@@ -45,19 +45,19 @@ function animate(timestamp) {
     timeLastFrame = timestamp;
 
     // todo dev fps
-    if (gameState === gameStates.inGame && settings.displayFps) {
+    if (settings.displayFps) {
         checks++;
         if (checks > 20) {
             drawFPS = Math.round(checks/((Date.now() - lastCheck)/1000.0));
             lastCheck = Date.now();
             checks = 0;
         }
-        cx.font = "40px Arial";
+        cx.font = Math.round(40 *sc())+"px Arial";
         cx.fillStyle = "black";
-        cx.fillText(drawFPS + " fps; "+Math.floor(gameTime/100)+"; "+blockSize
+        cx.fillText(drawFPS + " fps; "+Math.floor(gameTime/100)+"; "+Math.round(blockSize*100)/100
             +"; "+Math.round(mouse.pos.x*100)/100
             +"; "+Math.round(mouse.pos.y*100)/100
-            , 20, canvas.height-20);
+            , 20 *sc(), canvas.height-20 *sc());
 
         /*cx.font = "20px Arial";
         for (let i = 0; i < settings.blocksInHeight; i++) {

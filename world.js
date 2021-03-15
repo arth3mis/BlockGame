@@ -1,4 +1,4 @@
-const worldSize = new AVector(100, 40);
+const worldSize = new AVector(100, 70);
 
 let blockSize;
 function updateBlockSize() {
@@ -18,9 +18,43 @@ class World {
         this.background.addColorStop(0.4, "rgb(127,140,139)");
         this.background.addColorStop(1, "rgb(103,112,112)");
 
-        this.blockSprite = [];
-        this.blockSprite.push(new Image());  this.blockSprite[this.blockSprite.length-1].src = resPath + "block_1.png";
-        this.blockSprite.push(new Image());  this.blockSprite[this.blockSprite.length-1].src = resPath + "block_2.png";
+        this.loadedGraphics = null;
+        this.loadSprites();
+    }
+
+    loadSprites() {
+        let graphicsFile = "error";
+        if (settings.graphicsChoice < settings.worldBlockSpriteSizes.length) {
+            graphicsFile = settings.graphicsRange[settings.graphicsChoice].toLowerCase();
+        } else if (settings.graphicsChoice === settings.worldBlockSpriteSizes.length) {
+            graphicsFile = settings.graphicsRange[this.findClosestSpriteSize(true)];
+        } else if (settings.graphicsChoice === settings.worldBlockSpriteSizes.length + 1) {
+            graphicsFile = settings.graphicsRange[this.findClosestSpriteSize(false)];
+        }
+        if (graphicsFile === this.loadedGraphics) {
+            return;
+        }
+
+        this.blockSprite = new Array(2);
+        for (let i = 0; i < this.blockSprite.length; i++) {
+            this.blockSprite[i] = new Image();
+            this.blockSprite[i].src = resPath + "b" + (i+1) + "/" + graphicsFile + resFileType;
+        }
+    }
+
+    findClosestSpriteSize(roundUp) {
+        for (let i = 0; i < settings.worldBlockSpriteSizes.length; i++) {
+            if (blockSize >= settings.worldBlockSpriteSizes[i]) {
+                // get the middle between sizes
+                if (i > 0 && roundUp /*blockSize >= (settings.worldBlockSpriteSizes[i-1] + settings.worldBlockSpriteSizes[i]) / 2*/) {
+                    return i-1;
+                } else {
+                    return i;
+                }
+            }
+        }
+        // blockSize < settings.worldBlockSpriteSizes[settings.worldBlockSpriteSizes.length - 1]
+        return settings.worldBlockSpriteSizes.length - 1;
     }
 
     update(delta, activeBounds) {
@@ -65,7 +99,7 @@ class World {
         //this.blockGrid[25][Math.floor(worldSize.y * 0.6)] = new Block(0);
         this.blockGrid[26][Math.floor(worldSize.y * 0.6)] = new Block(0);
         this.blockGrid[27][Math.floor(worldSize.y * 0.6)] = new Block(0);
-        this.blockGrid[27][Math.floor(worldSize.y * 0.6)-2] = new Block(2);
+        this.blockGrid[27][Math.floor(worldSize.y * 0.6)-1] = new Block(2);
 
         this.blockGrid[23][worldSize.y-7] = new Block(2);
         this.blockGrid[24][worldSize.y-7] = new Block(2);

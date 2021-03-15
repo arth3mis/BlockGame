@@ -11,6 +11,10 @@ class Game {
         this.world.update(delta, [0,0,1,1]); // todo activeBounds could be for foreground animations like terraria butterflies
         this.player.update(delta);
 
+        this.setPlayerScreenPos();
+    }
+
+    setPlayerScreenPos() {
         this.playerScreenPos.set(canvas.width/2, canvas.height/2);
         // x world border on screen
         if (this.player.pos.x < canvas.width/2 / blockSize) {

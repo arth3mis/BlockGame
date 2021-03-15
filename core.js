@@ -1,5 +1,5 @@
-let menuInstance = new Menu();
-let settingsInstance = new Settings();
+const menuInstance = new Menu();
+const settingsInstance = new Settings();
 let gameInstance = new Game();
 
 const gameStates = {
@@ -28,14 +28,16 @@ window.addEventListener("mousemove", function(e) {  // window listener to detect
 canvas.addEventListener("mousedown", function(e) {
     if (e.button === 0) {
         mouse.lmb = true;
-        if (gameState !== gameStates.inGame) {
-            mouse.lmbTriggered = true;
-            mouse.lmbTriggerPos = mouse.pos.clone();
-        }
     } else if (e.button === 1) {
         mouse.mmb = true;
     } else if (e.button === 2) {
         mouse.rmb = true;
+    }
+    if (gameState !== gameStates.inGame) {
+        if (e.button === 0) {
+            mouse.lmbTriggered = true;
+            mouse.lmbTriggerPos = new AVector(e.x - canvasPosition.left, e.y - canvasPosition.top);
+        }
     }
 });
 canvas.addEventListener("mouseup", function(e) {
@@ -83,6 +85,7 @@ function handleKeyDown(key) {
     // open/close settings
     if (key === keybindings.toggleSettings) {
         if (gameState === gameStates.settingsMenu) {
+            settingsInstance.setMainPage();
             gameState = prevGameState;
         } else {
             if (gameState === gameStates.inGame)
@@ -164,7 +167,7 @@ function keyup(e) {
 }
 window.addEventListener("keyup", keyup);
 
-window.addEventListener("resize", function(e) {
+window.addEventListener("resize", function() {
     canvasPosition = canvas.getBoundingClientRect();
 
     // catch fullscreen exit by Escape button

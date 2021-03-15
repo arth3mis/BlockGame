@@ -59,5 +59,15 @@ class Game {
         cx.beginPath();
         cx.arc(this.playerScreenPos.x, this.playerScreenPos.y, this.player.radius * blockSize, 0, 2*Math.PI);
         cx.fill();
+
+        // lighting overlay
+        //cx.save();
+        //cx.globalAlpha = 0.4;
+        //cx.fillStyle = "rgb(13,31,79)";
+        //cx.fillRect(0, 0, canvas.width, canvas.height);
+        //cx.globalAlpha = 0.1;
+        //cx.fillStyle = "rgb(188,82,11)";
+        //cx.fillRect(0, 0, canvas.width, canvas.height);
+        //cx.restore();
     }
 }

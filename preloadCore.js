@@ -7,7 +7,7 @@ const settings = {
     dimension: new AVector(0,0),
     dimensions: [[1920,1080], [1280,720], [800,600], [640,480]],
     dimScales:  [      [1,1],      [2,3],     [5,9],     [4,9]],
-    dimensionChoice: 0,
+    dimensionChoice: 1,
     fullscreen: false,
 
     blocksInHeightRange: [17, 54],

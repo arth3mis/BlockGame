@@ -60,8 +60,7 @@ class World {
         return settings.worldBlockSpriteSizes.length - 1;
     }
 
-    update(delta) {
-        const T = delta / timeUnit;
+    update(T) {
         this.day += T / dayLength;
     }
 

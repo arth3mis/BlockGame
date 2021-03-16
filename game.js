@@ -7,10 +7,28 @@ class Game {
     }
 
     update(delta) {
-        this.world.update(delta);
-        this.player.update(delta);
+        const T = delta / timeUnit;
+
+        this.world.update(T);  // todo add list (in world class?) that knows blocks that have particles active, and update those (in world.update?)
+        this.player.update(T);
 
         this.setPlayerScreenPos();
+
+        // mouse interaction
+        if (mouse.lmb) {
+            let blockUnderMouse = new AVector(Math.floor(this.player.pos.x + (mouse.pos.x - this.playerScreenPos.x) / blockSize), Math.floor(this.player.pos.y + (mouse.pos.y - this.playerScreenPos.y) / blockSize));  // equation solved for i (see block drawing above): SCREEN_DRAW_POS.x = this.playerScreenPos.x + (i - this.player.pos.x) * blockSize
+            if (this.world.blockGrid[blockUnderMouse.x][blockUnderMouse.y].id !== 0) {
+                this.world.blockGrid[blockUnderMouse.x][blockUnderMouse.y].break(500 * T);
+            }
+        } else if (mouse.mmb) {
+            let blockUnderMouse = new AVector(Math.floor(this.player.pos.x + (mouse.pos.x - this.playerScreenPos.x) / blockSize), Math.floor(this.player.pos.y + (mouse.pos.y - this.playerScreenPos.y) / blockSize));
+            if (this.world.blockGrid[blockUnderMouse.x][blockUnderMouse.y].id === 0) {
+                // TODO dont place on player
+                if (Math.floor(this.player.pos.x % 2) === 0) {
+                    this.world.blockGrid[blockUnderMouse.x][blockUnderMouse.y].turnToBlock(2);
+                }
+            }
+        }
     }
 
     setPlayerScreenPos() {
@@ -48,14 +66,14 @@ class Game {
         }
 
         // todo dev
-        if (mouse.lmb) {
-            cx.lineWidth = 2;
-            cx.strokeStyle = "black";
-            cx.beginPath();
-            cx.moveTo(this.playerScreenPos.x, this.playerScreenPos.y);
-            cx.lineTo(mouse.pos.x, mouse.pos.y);
-            cx.stroke();
-        }
+//        if (mouse.lmb) {
+//            cx.lineWidth = sc(2);
+//            cx.strokeStyle = "black";
+//            cx.beginPath();
+//            cx.moveTo(this.playerScreenPos.x, this.playerScreenPos.y);
+//            cx.lineTo(mouse.pos.x, mouse.pos.y);
+//            cx.stroke();
+//        }
 
         cx.fillStyle = this.player.color;
         cx.beginPath();

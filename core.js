@@ -47,7 +47,7 @@ canvas.addEventListener("mouseup", function(e) {
         mouse.mmb = false;
     } else if (e.button === 2 && mouse.rmb) {
         mouse.rmb = false;
-        disableKeyboardPresses();
+        disableUserInputs();
     }
 });
 
@@ -68,7 +68,9 @@ const keyboard = {
     moveRight: false,
     jump: false,
 }
-function disableKeyboardPresses() {
+function disableUserInputs() {
+    mouse.lmb = false;
+    mouse.mmb = false;
     if (keyboard.moveUp)
         handleKeyUp(keybindings.moveUp);
     if (keyboard.moveLeft)
@@ -88,8 +90,9 @@ function handleKeyDown(key) {
             settingsInstance.setMainPage();
             gameState = prevGameState;
         } else {
-            if (gameState === gameStates.inGame)
-                disableKeyboardPresses();
+            if (gameState === gameStates.inGame) {
+                disableUserInputs();
+            }
             prevGameState = gameState;
             gameState = gameStates.settingsMenu;
         }

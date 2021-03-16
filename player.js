@@ -39,8 +39,7 @@ class Player {
         //this.colorCycleTime = 20;
     }
 
-    update(delta) {
-        const T = delta / timeUnit;
+    update(T) {
         //this.colorH = (this.colorH + 360/this.colorCycleTime * T) % 360;
         //this.color = "hsl("+Math.round(this.colorH)+",70%,55%)"
 

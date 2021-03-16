@@ -1,5 +1,4 @@
 // time calculation
-const timeUnit = 1000;  // 1000 -> speed values etc. are "per second"
 let gameTime = 0;
 
 let timeStep = 1000 / 60;
@@ -52,12 +51,13 @@ function animate(timestamp) {
             lastCheck = Date.now();
             checks = 0;
         }
-        cx.font = Math.round(40 *sc())+"px Arial";
+        cx.font = sc(40)+"px Arial";
         cx.fillStyle = "black";
         cx.fillText(drawFPS + " fps; "+Math.floor(gameTime/100)+"; "+Math.round(blockSize*100)/100
             +"; "+Math.round(mouse.pos.x*100)/100
             +"; "+Math.round(mouse.pos.y*100)/100
-            , 20 *sc(), canvas.height-20 *sc());
+            +"; "+Math.round(gameInstance.world.day*100)/100
+            , sc(20), canvas.height - sc(20));
 
         /*cx.font = "20px Arial";
         for (let i = 0; i < settings.blocksInHeight; i++) {

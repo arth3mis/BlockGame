@@ -20,13 +20,13 @@ class Player {
 
         this.jumpVel = -15;
         this.jumpTime = 0;
-        this.jumpTimeout = 300;
+        this.jumpTimeout = 0.3 * timeUnit;
         this.jumping = false;
         this.jumped = false;
         this.firstJumped = false;
         this.inAir = false;
         this.inAirStart = 0;
-        this.inAirJumpDelay = 70;
+        this.inAirJumpDelay = 0.07 * timeUnit;
 
         this.maxVelFall = 30;
         this.hitTopVelLimit = 10;

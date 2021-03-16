@@ -1,5 +1,3 @@
-const worldSize = new AVector(100, 70);
-
 let blockSize;
 function updateBlockSize() {
     blockSize = canvas.height / settings.blocksInHeight;
@@ -11,7 +9,7 @@ class World {
         if (save == null) {
             this.generate();
         } else {
-            this.load();
+            this.load(save);
         }
         this.background = cx.createLinearGradient(0, 0, 0, canvas.height);
         this.background.addColorStop(0, "rgb(157,176,174)");
@@ -19,6 +17,8 @@ class World {
         this.background.addColorStop(1, "rgb(103,112,112)");
 
         this.loadedGraphics = null;
+        this.blockSprites = new Array(2);
+        this.blockDestructionSprites = new Array(10);
         this.loadSprites();
     }
 
@@ -35,10 +35,13 @@ class World {
             return;
         }
 
-        this.blockSprite = new Array(2);
-        for (let i = 0; i < this.blockSprite.length; i++) {
-            this.blockSprite[i] = new Image();
-            this.blockSprite[i].src = resPath + "b" + (i+1) + "/" + graphicsFile + resFileType;
+        for (let i = 0; i < this.blockSprites.length; i++) {
+            this.blockSprites[i] = new Image();
+            this.blockSprites[i].src = resPath + "b" + (i+1) + "/" + graphicsFile + resFileType;
+        }
+        for (let i = 0; i < this.blockDestructionSprites.length; i++) {
+            this.blockDestructionSprites[i] = new Image();
+            this.blockDestructionSprites[i].src = resPath + "bDestroy/" + i + "/" + graphicsFile + resFileType;
         }
     }
 
@@ -57,15 +60,18 @@ class World {
         return settings.worldBlockSpriteSizes.length - 1;
     }
 
-    update(delta, activeBounds) {
-
+    update(delta) {
+        const T = delta / timeUnit;
+        this.day += T / dayLength;
     }
 
-    load() {
+    load(save) {
 
     }
 
     generate() {
+        this.day = 0;
+
         this.blockGrid = new Array(worldSize.x);
         for (let i = 0; i < worldSize.x; i++) {
             this.blockGrid[i] = new Array(worldSize.y);
@@ -99,7 +105,8 @@ class World {
         //this.blockGrid[25][Math.floor(worldSize.y * 0.6)] = new Block(0);
         this.blockGrid[26][Math.floor(worldSize.y * 0.6)] = new Block(0);
         this.blockGrid[27][Math.floor(worldSize.y * 0.6)] = new Block(0);
-        this.blockGrid[27][Math.floor(worldSize.y * 0.6)-1] = new Block(2);
+        this.blockGrid[27][Math.floor(worldSize.y * 0.6)-1] = new Block(1);
+        this.blockGrid[27][Math.floor(worldSize.y * 0.6)-1].broken = 85;
 
         this.blockGrid[23][worldSize.y-7] = new Block(2);
         this.blockGrid[24][worldSize.y-7] = new Block(2);

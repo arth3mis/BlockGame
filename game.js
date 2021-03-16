@@ -1,14 +1,13 @@
 class Game {
     constructor(save=null) {
+        // todo load from file
         this.world = new World(save);
-
-        // todo load player from same file
         this.player = new Player(this.world, save);
         this.playerScreenPos = new AVector(canvas.width/2, canvas.height/2);
     }
 
     update(delta) {
-        this.world.update(delta, [0,0,1,1]); // todo activeBounds could be for foreground animations like terraria butterflies
+        this.world.update(delta);
         this.player.update(delta);
 
         this.setPlayerScreenPos();
@@ -40,7 +39,10 @@ class Game {
             for (let j = Math.max(0, Math.floor(this.player.pos.y - this.playerScreenPos.y/blockSize));
                  j <= Math.min(worldSize.y-1, Math.floor(this.player.pos.y + (canvas.height-this.playerScreenPos.y)/blockSize)); j++) {
                 if (this.world.blockGrid[i][j].id !== 0) {
-                    cx.drawImage(this.world.blockSprite[this.world.blockGrid[i][j].id - 1], this.playerScreenPos.x + (i - this.player.pos.x) * blockSize, this.playerScreenPos.y + (j - this.player.pos.y) * blockSize, blockSize, blockSize);
+                    cx.drawImage(this.world.blockSprites[this.world.blockGrid[i][j].id - 1], this.playerScreenPos.x + (i - this.player.pos.x) * blockSize, this.playerScreenPos.y + (j - this.player.pos.y) * blockSize, blockSize, blockSize);
+                    if (this.world.blockGrid[i][j].broken > 0) {
+                        cx.drawImage(this.world.blockDestructionSprites[Math.ceil(this.world.blockGrid[i][j].broken / this.world.blockDestructionSprites.length) - 1], this.playerScreenPos.x + (i - this.player.pos.x) * blockSize, this.playerScreenPos.y + (j - this.player.pos.y) * blockSize, blockSize, blockSize);
+                    }
                 }
             }
         }

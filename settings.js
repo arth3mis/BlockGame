@@ -134,7 +134,7 @@ class Settings {
         cx.translate(canvas.width/2 - this.size.x/2, canvas.height/2 - this.size.y/2);
 
         // border/background
-        cx.lineWidth = 25 *sc();
+        cx.lineWidth = sc(25);
         cx.strokeStyle = "rgb(37,60,74)";
         cx.fillStyle = "rgb(63,136,176)";
         cx.beginPath();
@@ -146,7 +146,7 @@ class Settings {
         cx.stroke();
         cx.fill();
 
-        cx.font = Math.round(40 *sc())+"px Arial";
+        cx.font = sc(40)+"px Arial";
 
         // title
         cx.fillStyle = "rgb(43,90,115)";

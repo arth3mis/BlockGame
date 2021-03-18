@@ -1,11 +1,19 @@
-const GAME_VERSION = 0;
+const GAME_VERSION = 1;
+const GAME_NAME = "BlockGame";
 
 const canvas = document.getElementById("canvas");
 const cx = canvas.getContext("2d");
 const resPath = "res/", resFileType = ".png";
+const saveFileType = ".block";
 
 // game settings and user options
 const timeUnit = 1000;  // 1000 -> speed values etc. are "per second"
+
+const gameStates = {
+    inGame: "inGame",
+    mainMenu: "mainMenu",
+    settingsMenu: "settingsMenu",
+}
 
 const worldTime = {
     dayLength: 60,  // in seconds resp. timeUnits    day starts at 6:00
@@ -78,13 +86,21 @@ function uploadFile() {
            only variable, hence immutable. To make any changes,
            changing const to var, here and In the reader.onload
            function would be advisable */
+
         const file = files[0];
+        if (!file.name.includes(saveFileType)) {
+            alert("File must be of '"+saveFileType+"' type!");
+            return;
+        }
+
         let reader = new FileReader();
         reader.onload = function(e) {
             const file = e.target.result;
             // This is a regular expression to identify carriage
             const lines = file.split(/\r\n|\n/);
+
             console.log(lines.join("; "))   // TODO use data
+
             document.body.removeChild(element);
         };
         reader.onerror = (e) => alert(e.target.error.name);
@@ -93,7 +109,7 @@ function uploadFile() {
 }
 
 // world downloading framework
-function downloadFile(filename, text) {
+function downloadFile(filename, text) {  // https://ourcodeworld.com/articles/read/189/how-to-create-a-file-and-generate-a-download-with-javascript-in-the-browser-without-a-server
     const element = document.createElement('a');
     element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
     element.setAttribute('download', filename);
@@ -105,6 +121,3 @@ function downloadFile(filename, text) {
 
     document.body.removeChild(element);
 }
-
-// Start file download.
-//downloadFile("hello.txt","This is the content of my file :)");

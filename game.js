@@ -77,22 +77,12 @@ class Game {
             }
         }
 
-        // todo dev
-//        if (mouse.lmb) {
-//            cx.lineWidth = sc(2);
-//            cx.strokeStyle = "black";
-//            cx.beginPath();
-//            cx.moveTo(this.playerScreenPos.x, this.playerScreenPos.y);
-//            cx.lineTo(mouse.pos.x, mouse.pos.y);
-//            cx.stroke();
-//        }
-
         cx.fillStyle = this.player.color;
         cx.beginPath();
         cx.arc(this.playerScreenPos.x, this.playerScreenPos.y, this.player.radius * blockSize, 0, 2*Math.PI);
         cx.fill();
 
-        // lighting overlay
+        // todo lighting overlay
         //cx.save();
         //cx.globalAlpha = 0.4;
         //cx.fillStyle = "rgb(13,31,79)";

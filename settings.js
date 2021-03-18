@@ -9,11 +9,20 @@ class Settings {
         this.stdTitle = "Settings";
         this.title = this.stdTitle;
 
+        this.colors = {
+            border: ["rgb(37,60,74)", "rgb(151,210,165)"],
+            bgFill: ["rgb(63,136,176)", "rgb(67,176,63)"],
+            titleBG: ["rgb(43,90,115)", "rgb(43,115,50)"],
+            title: ["rgb(87,159,198)", "rgb(87,198,89)"],
+            hoverButton: ["rgb(58,127,165)", "rgb(58,165,60)"],
+        }
+
         // buttons
         this.buttons = [
             "Resolution",
             "Graphics",
             "Zoom"
+            // TODO keybindings
         ];
         this.stdButtonTexts = [];
         for (let i = 0; i < this.buttons.length; i++) {
@@ -76,10 +85,10 @@ class Settings {
                         // update player onscreen position for background drawing
                         if (prevGameState === gameStates.inGame) {
                             gameInstance.setPlayerScreenPos();
-                        }
-                        // update graphics when auto (necessity is checked in loadSprites)
-                        if (settings.graphicsChoice === settings.worldBlockSpriteSizes.length) {
-                            gameInstance.world.loadSprites();
+                            // update graphics when auto (necessity is checked in loadSprites)
+                            if (settings.graphicsChoice === settings.worldBlockSpriteSizes.length) {
+                                gameInstance.world.loadSprites();
+                            }
                         }
                         this.title = "Current: " + settings.dimension.x + "x" + settings.dimension.y;
                         break;
@@ -90,7 +99,9 @@ class Settings {
                             break;
                         }
                         settings.graphicsChoice = this.buttonHovered;
-                        gameInstance.world.loadSprites();
+                        if (prevGameState === gameStates.inGame) {
+                            gameInstance.world.loadSprites();
+                        }
                         this.title = "Current: " + settings.graphicsRange[settings.graphicsChoice].replace(" (recommended)", "");
                         break;
                     // zoom
@@ -105,12 +116,12 @@ class Settings {
                         // update player onscreen position for background drawing
                         if (prevGameState === gameStates.inGame) {
                             gameInstance.setPlayerScreenPos();
+                            // update graphics when auto (necessity is checked in loadSprites)
+                            if (settings.graphicsChoice === settings.worldBlockSpriteSizes.length) {
+                                gameInstance.world.loadSprites();
+                            }
                         }
-                        // update graphics when auto (necessity is checked in loadSprites)
-                        if (settings.graphicsChoice === settings.worldBlockSpriteSizes.length) {
-                            gameInstance.world.loadSprites();
-                        }
-                        this.title = "Current Zoom: " + Math.round((1 + settings.zoomFactorChoice)*10)/10;
+                        this.title = "Current: " + Math.round((1 + settings.zoomFactorChoice)*10)/10;
                         break;
                 }
                 mouse.lmbTriggered = false;
@@ -129,14 +140,22 @@ class Settings {
         this.buttonClicked = -1;
     }
 
-    draw() {
+    draw(overMainMenu=false) {
+        let mm = 0;
+        if (overMainMenu) {
+            mm = 1;
+            cx.globalAlpha = 0.4;
+            cx.fillStyle = "black";
+            cx.fillRect(0, 0, canvas.width, canvas.height);
+            cx.globalAlpha = 1;
+        }
         cx.save();
         cx.translate(canvas.width/2 - this.size.x/2, canvas.height/2 - this.size.y/2);
 
         // border/background
         cx.lineWidth = sc(25);
-        cx.strokeStyle = "rgb(37,60,74)";
-        cx.fillStyle = "rgb(63,136,176)";
+        cx.strokeStyle = this.colors.border[mm];
+        cx.fillStyle = this.colors.bgFill[mm];
         cx.beginPath();
         cx.moveTo(0, 0);
         cx.lineTo(this.size.x, 0);
@@ -146,21 +165,21 @@ class Settings {
         cx.stroke();
         cx.fill();
 
-        cx.font = sc(40)+"px Arial";
+        cx.font = sc(40) + "px Arial";
 
         // title
-        cx.fillStyle = "rgb(43,90,115)";
+        cx.fillStyle = this.colors.titleBG[mm];
         cx.fillRect(0, 0, this.size.x, this.size.y * this.titleHeightP);
         cx.textAlign = "center";
         cx.textBaseline = "middle";
-        cx.fillStyle = "rgb(87,159,198)";
+        cx.fillStyle = this.colors.title[mm];
         cx.fillText(this.title, this.size.x/2, this.size.y * this.titleHeightP / 2);
 
         // draw buttons
         let btnHeight = this.size.y * (1 - this.titleHeightP) / this.buttonTexts.length;
         for (let i = 0; i < this.buttonTexts.length; i++) {
             if (this.buttonHovered === i) {
-                cx.fillStyle = "rgb(58,127,165)";
+                cx.fillStyle = this.colors.hoverButton[mm];
                 cx.fillRect(0, this.size.y * this.titleHeightP + i * btnHeight, this.size.x, btnHeight);
                 cx.fillStyle = "white";
             } else {
@@ -169,7 +188,6 @@ class Settings {
             cx.fillText(this.buttonTexts[i], this.size.x/2, this.size.y * this.titleHeightP + i * btnHeight + btnHeight/2);
 
         }
-
         cx.restore();
     }
 }

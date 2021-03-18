@@ -51,12 +51,12 @@ function animate(timestamp) {
             lastCheck = Date.now();
             checks = 0;
         }
-        cx.font = sc(40)+"px Arial";
+        cx.textAlign = "left";
+        cx.textBaseline = "bottom";
+        cx.font = sc(40) + "px Arial";
         cx.fillStyle = "black";
         cx.fillText(drawFPS + " fps; "+Math.floor(gameTime/100)+"; "+Math.round(blockSize*100)/100
-            +"; "+gameInstance.player.jumpsTriggered
-            +"; "+gameInstance.player.jumpsDone
-            +"; "+Math.round(gameInstance.world.day*100)/100
+            +"; "+(gameInstance != null ? Math.round(gameInstance.world.day*100)/100 : "-")
             , sc(20), canvas.height - sc(20));
     }
 
@@ -67,6 +67,9 @@ requestAnimationFrame(animate);
 
 function update(delta) {
     switch (gameState) {
+        case "mainMenu":
+            menuInstance.update(delta);
+            break;
         case "inGame":
             gameInstance.update(delta);
             break;
@@ -78,16 +81,20 @@ function update(delta) {
 
 function draw() {
     switch (gameState) {
+        case "mainMenu":
+            menuInstance.draw();
+            break;
         case "inGame":
             gameInstance.draw();
             break;
         case "settingsMenu":
             if (prevGameState === gameStates.inGame) {
                 gameInstance.draw();
+                settingsInstance.draw();
             } else if (prevGameState === gameStates.mainMenu) {
                 menuInstance.draw();
+                settingsInstance.draw(true);
             }
-            settingsInstance.draw();
             break;
     }
 }

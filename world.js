@@ -6,7 +6,7 @@ updateBlockSize();
 
 const saveFileLowestSupportedVersion = 1;
 function checkSaveFile(file) {
-
+    // TODO continue
     return true;
 }
 

@@ -1,13 +1,8 @@
 const menuInstance = new Menu();
 const settingsInstance = new Settings();
-let gameInstance = new Game();
+let gameInstance = null;
 
-const gameStates = {
-    inGame: "inGame",
-    mainMenu: "mainMenu",
-    settingsMenu: "settingsMenu",
-}
-let gameState = gameStates.inGame;
+let gameState = gameStates.mainMenu;
 let prevGameState = gameStates.mainMenu;
 
 const mouse = {
@@ -33,7 +28,7 @@ canvas.addEventListener("mousedown", function(e) {
     } else if (e.button === 2) {
         mouse.rmb = true;
     }
-    if (gameState !== gameStates.inGame) {
+    if (gameState === gameStates.settingsMenu) {
         if (e.button === 0) {
             mouse.lmbTriggered = true;
             mouse.lmbTriggerPos = new AVector(e.x - canvasPosition.left, e.y - canvasPosition.top);
@@ -55,6 +50,8 @@ const keybindings = {
     toggleSettings: "t",
     toggleFullscreen: "f",
     loadWorld: "l",
+    saveOrGenerateWorld: "enter",
+    exitToMenu: "backspace",
     moveUp: "w",
     moveLeft: "a",
     moveDown: "s",
@@ -110,11 +107,35 @@ function handleKeyDown(key) {
         }
     }
     // load world
-    else if (key === keybindings.loadWorld) {
-        uploadFile();
+    else if (key === keybindings.loadWorld && gameState === gameStates.mainMenu) {
+        uploadFile();  // further logic in preloadCore.js/uploadFile()
+    }
+    // save/generate world
+    else if (key === keybindings.saveOrGenerateWorld) {
+        if (gameState === gameStates.inGame) {
+            disableUserInputs();
+            downloadFile("test.block", "abc\n123");
+        } else if (gameState === gameStates.mainMenu) {
+            menuInstance.generatingWorld = true;
+            gameInstance = new Game();
+            menuInstance.generatingWorld = false;
+            prevGameState = gameState;
+            gameState = gameStates.inGame;
+        }
+    }
+    // exit to main menu
+    if (key === keybindings.exitToMenu) {
+        if (gameState === gameStates.inGame) {
+            disableUserInputs();
+            prevGameState = gameState;
+            gameState = gameStates.mainMenu;
+        } else if (gameState === gameStates.mainMenu && gameInstance != null) {
+            prevGameState = gameState;
+            gameState = gameStates.inGame;
+        }
     }
     // control
-    if (gameState === gameStates.inGame) {
+    if (gameState === gameStates.inGame && gameInstance != null) {
         if (key === keybindings.moveUp && !keyboard.moveUp) {
             keyboard.moveUp = true;
         }

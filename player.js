@@ -2,12 +2,13 @@ class Player {
     constructor(worldRef, save) {
         this.wld = worldRef;
 
-        this.gravity = 50;
+        this.gravity = 60;
 
         this.pos = new AVector(40, 30);
         this.vel = new AVector(0, 0);
         this.acc = new AVector(0, this.gravity);
 
+        // x movement
         this.accLR = 16;
         this.maxVelX = 10;
         this.brakeXFactor = 2;
@@ -16,24 +17,35 @@ class Player {
 
         this.edgePush = 0;
         this.edgePushFactor = 2;
-        this.edgePushThreshold = 0.1;
+        this.edgePushThreshold = 0.01;
 
-        this.jumpVel = -15;
-        this.jumpTime = 0;
-        this.jumpTimeout = 0.3 * timeUnit;
-        this.jumping = false;
-        this.jumped = false;
-        this.firstJumped = false;
-        this.inAir = false;
-        this.inAirStart = 0;
-        this.inAirJumpDelay = 0.07 * timeUnit;
-
+        // y movement
         this.maxVelFall = 30;
         this.hitTopVelLimit = 10;
 
+        // jumping (how high player can jump is determined by jumpVel && jumpTimeout)
+        // settings
+        this.jumpVel = -12;  // jump velocity
+        this.jumpTimeout = 0.3 * timeUnit;  // jump duration
+        this.inAirJumpDelay = 0.07 * timeUnit;  // can still jump after this time in air
+        this.autoJump = false;
+        this.jumpsPossible = 1;
+        this.followUpJumpsStrengthFactor = 0.9;
+
+        // calculation variables
+        this.jumpTime = 0;
+        this.jumping = false;  // keyboard holding for height
+        this.firstJumped = false;
+        this.jumpTriggerNeeded = false;  // waits for keyboard to trigger jump again (used when !autoJump)
+        this.jumpsTriggered = 0;  // goes up with keyboard presses
+        this.jumpsDone = 0;  // actually started jumps
+        this.inAir = false;
+        this.inAirStart = 0;
+
+
         this.radius = 0.75;  // must be below 1 (collision is not fail-proof for every size)
 
-        this.color = "rgb(94,248,245)"
+        this.color = "rgb(94,248,245)";
         //this.colorH = 0;
         //this.color = "hsl(0,70%,55%)";
         //this.colorCycleTime = 20;
@@ -63,8 +75,24 @@ class Player {
         this.edgePush = 0;
 
         // jumping
-        if (this.jumping && gameTime - this.jumpTime < this.jumpTimeout) {
-            this.vel.setY(this.jumpVel);
+        if (keyboard.jump && (this.autoJump || !this.jumpTriggerNeeded)) {
+            // start jump from ground
+            if (!this.firstJumped && (!this.inAir || gameTime - this.inAirStart < this.inAirJumpDelay)) {
+                this.startFirstJump();
+            }
+            // start jump if possible and if keyboard triggered again
+            if (this.inAir && this.jumpsTriggered > this.jumpsDone && this.jumpsDone < this.jumpsPossible) {
+                if (this.jumpsDone === 0) {
+                    // walked into air, simulate first jump
+                    this.jumpsTriggered++;
+                    this.jumpsDone = 1;
+                }
+                this.startJump();
+            }
+            // jump while holding jump button
+            if (this.jumping && gameTime - this.jumpTime < this.jumpTimeout * (this.jumpsDone > 1 ? this.followUpJumpsStrengthFactor : 1)) {
+                this.vel.setY(this.jumpVel * (this.jumpsDone > 1 ? this.followUpJumpsStrengthFactor : 1));
+            }
         }
 
         // brake fall
@@ -72,7 +100,8 @@ class Player {
             this.vel.y = this.maxVelFall;
         }
 
-        let prePos = this.pos.clone();
+        // update position
+        let prePos = this.pos.clone();  // to detect movement direction and block skipping in collision calculation
         this.pos.add(AVector.mult(this.vel, T));
 
         // collision
@@ -213,10 +242,30 @@ class Player {
         if (hitTop) {
             this.jumping = false;
         } else {
-            this.jumped = false;
-            this.firstJumped = false;
             this.inAir = false;
             this.inAirStart = -1;
+            this.firstJumped = false;
+            this.jumpsDone = 0;
+            this.jumpsTriggered = 0;
+            this.jumpTriggerNeeded = true;
         }
+    }
+
+    startJump() {
+        this.jumpsDone++;
+        this.jumping = true;
+        this.jumpTime = gameTime;
+    }
+
+    startFirstJump() {
+        this.startJump();
+        if (this.autoJump) {
+            this.jumpsTriggered = 1;  // simulate keyboard trigger (needed for double jump mechanic)
+        }
+        this.firstJumped = true;
+    }
+
+
+    load(save) {
     }
 }

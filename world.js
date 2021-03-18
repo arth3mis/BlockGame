@@ -4,6 +4,12 @@ function updateBlockSize() {
 }
 updateBlockSize();
 
+const saveFileLowestSupportedVersion = 1;
+function checkSaveFile(file) {
+
+    return true;
+}
+
 class World {
     constructor(save) {
         if (save == null) {
@@ -61,8 +67,9 @@ class World {
     }
 
     update(T) {
-        this.day += T / dayLength;
+        this.day += T / worldTime.dayLength;
     }
+
 
     load(save) {
 

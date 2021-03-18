@@ -22,10 +22,22 @@ class Game {
             }
         } else if (mouse.mmb) {
             let blockUnderMouse = new AVector(Math.floor(this.player.pos.x + (mouse.pos.x - this.playerScreenPos.x) / blockSize), Math.floor(this.player.pos.y + (mouse.pos.y - this.playerScreenPos.y) / blockSize));
-            if (this.world.blockGrid[blockUnderMouse.x][blockUnderMouse.y].id === 0) {
-                // TODO dont place on player
-                if (Math.floor(this.player.pos.x % 2) === 0) {
-                    this.world.blockGrid[blockUnderMouse.x][blockUnderMouse.y].turnToBlock(2);
+            // do not place outside bounds or on solid block
+            if (blockUnderMouse.x >= 0 && blockUnderMouse.x < worldSize.x &&
+                blockUnderMouse.y >= 0 && blockUnderMouse.y < worldSize.y &&
+                this.world.blockGrid[blockUnderMouse.x][blockUnderMouse.y].id === 0) {
+                // do not place mid-air
+                if ((blockUnderMouse.x > 0 && this.world.blockGrid[blockUnderMouse.x-1][blockUnderMouse.y].id !== 0) ||
+                    (blockUnderMouse.x < worldSize.x-1 && this.world.blockGrid[blockUnderMouse.x+1][blockUnderMouse.y].id !== 0) ||
+                    (blockUnderMouse.y > 0 && this.world.blockGrid[blockUnderMouse.x][blockUnderMouse.y-1].id !== 0) ||
+                    (blockUnderMouse.x < worldSize.x-1 && this.world.blockGrid[blockUnderMouse.x][blockUnderMouse.y+1].id !== 0)) {
+                    // do not place on player
+                    if ((Math.abs(this.player.pos.x - blockUnderMouse.x) >= this.player.radius &&
+                         Math.abs(this.player.pos.x - blockUnderMouse.x - 1) >= this.player.radius) ||
+                        (Math.abs(this.player.pos.y - blockUnderMouse.y) >= this.player.radius &&
+                         Math.abs(this.player.pos.y - blockUnderMouse.y - 1) >= this.player.radius)) {
+                        this.world.blockGrid[blockUnderMouse.x][blockUnderMouse.y].turnToBlock(2);
+                    }
                 }
             }
         }

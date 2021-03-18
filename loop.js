@@ -54,18 +54,10 @@ function animate(timestamp) {
         cx.font = sc(40)+"px Arial";
         cx.fillStyle = "black";
         cx.fillText(drawFPS + " fps; "+Math.floor(gameTime/100)+"; "+Math.round(blockSize*100)/100
-            +"; "+Math.round(mouse.pos.x*100)/100
-            +"; "+Math.round(mouse.pos.y*100)/100
+            +"; "+gameInstance.player.jumpsTriggered
+            +"; "+gameInstance.player.jumpsDone
             +"; "+Math.round(gameInstance.world.day*100)/100
             , sc(20), canvas.height - sc(20));
-
-        /*cx.font = "20px Arial";
-        for (let i = 0; i < settings.blocksInHeight; i++) {
-            cx.fillText(i+"", 3, (i+1)*blockSize - 7);
-        }
-        for (let i = 1; i < worldSize.x; i++) {
-            cx.fillText(i+"", i * blockSize + 2, canvas.height - 7);
-        }*/
     }
 
     // -----------------------------------------------------------------------------------------------------------------

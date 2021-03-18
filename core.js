@@ -54,6 +54,7 @@ canvas.addEventListener("mouseup", function(e) {
 const keybindings = {
     toggleSettings: "t",
     toggleFullscreen: "f",
+    loadWorld: "l",
     moveUp: "w",
     moveLeft: "a",
     moveDown: "s",
@@ -84,6 +85,7 @@ function disableUserInputs() {
 }
 
 function handleKeyDown(key) {
+    key = key.toLowerCase();
     // open/close settings
     if (key === keybindings.toggleSettings) {
         if (gameState === gameStates.settingsMenu) {
@@ -107,6 +109,10 @@ function handleKeyDown(key) {
             document.exitFullscreen();
         }
     }
+    // load world
+    else if (key === keybindings.loadWorld) {
+        uploadFile();
+    }
     // control
     if (gameState === gameStates.inGame) {
         if (key === keybindings.moveUp && !keyboard.moveUp) {
@@ -123,17 +129,10 @@ function handleKeyDown(key) {
             keyboard.moveRight = true;
             gameInstance.player.acc.add(gameInstance.player.accLR,0);
         }
-        if (key === keybindings.jump) {
-            if (!keyboard.jump && !gameInstance.player.jumped &&
-                (!gameInstance.player.inAir || gameTime - gameInstance.player.inAirStart < gameInstance.player.inAirJumpDelay)) {
-                gameInstance.player.jumpTime = gameTime;
-                gameInstance.player.jumped = true;
-                gameInstance.player.jumping = true;
-                if (!gameInstance.player.firstJumped) {
-                    gameInstance.player.firstJumped = true;
-                }
-            }
+        if (key === keybindings.jump && !keyboard.jump) {
             keyboard.jump = true;
+            gameInstance.player.jumpsTriggered++;
+            gameInstance.player.jumpTriggerNeeded = false;
         }
     }
 }
@@ -143,6 +142,7 @@ function keydown(e) {
 window.addEventListener("keydown", keydown);
 
 function handleKeyUp(key) {
+    key = key.toLowerCase();
     // control
     if (gameState === gameStates.inGame) {
         if (key === keybindings.moveUp && keyboard.moveUp) {

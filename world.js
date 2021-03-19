@@ -1,13 +1,20 @@
+let worldSize;
 let blockSize;
 function updateBlockSize() {
     blockSize = canvas.height / settings.blocksInHeight;
 }
 updateBlockSize();
 
-const saveFileLowestSupportedVersion = 1;
-function checkSaveFile(file) {
-    // TODO continue
-    return true;
+const worldTime = {
+    dayLength: 60,  // in seconds resp. timeUnits    day starts at 6:00
+    sunrise: [0.9375, 1],      // 4:30 - 6:00
+    sunset: [0.5417, 0.6042],  // 19:00 - 20:30
+}
+
+const saveFileLowestSupportedVersion = 2;
+function checkSaveFile(versionLine) {
+    let v = parseInt(versionLine);
+    return v >= saveFileLowestSupportedVersion;
 }
 
 class World {
@@ -72,10 +79,40 @@ class World {
 
 
     load(save) {
+        let s = save[2].split(saveSeparator);
+        worldSize = new AVector(parseInt(s[0]), parseInt(s[1]));
+        this.day = parseFloat(save[3]);
+        s = save[4].split(saveSeparator);
+        this.worldSpawn = new AVector(parseInt(s[0]), parseInt(s[1]));
+        // block data
+        this.blockGrid = new Array(worldSize.x);
+        for (let x = 0; x < worldSize.x; x++) {
+            this.blockGrid[x] = new Array(worldSize.y);
+            s = save[5 + x].split(saveSeparator);
+            for (let y = 0; y < worldSize.y; y++) {
+                this.blockGrid[x][y] = new Block(parseInt(s[y]));
+            }
+        }
+    }
 
+    save() {
+        let s = GAME_VERSION +"\n"+
+            gameInstance.saveName +"\n"+
+            worldSize.x + saveSeparator + worldSize.y +"\n"+
+            this.day +"\n"+
+            this.worldSpawn.x + saveSeparator + this.worldSpawn.y +"\n";
+        // block data
+        for (let x = 0; x < worldSize.x; x++) {
+            for (let y = 0; y < worldSize.y; y++) {
+                s += this.blockGrid[x][y].id + saveSeparator;
+            }
+            s += "\n";
+        }
+        return s;
     }
 
     generate() {
+        worldSize = new AVector(100, 70);
         this.day = 0;
 
         this.blockGrid = new Array(worldSize.x);
@@ -89,6 +126,9 @@ class World {
                 else this.blockGrid[i][j] = new Block(0);
             }
         }
+        this.worldSpawn = new AVector(40, 41.25);
+
+
         this.blockGrid[3][Math.floor(worldSize.y * 0.6)] = new Block(0);
         this.blockGrid[4][Math.floor(worldSize.y * 0.6)] = new Block(0);
 
@@ -112,7 +152,6 @@ class World {
         this.blockGrid[26][Math.floor(worldSize.y * 0.6)] = new Block(0);
         this.blockGrid[27][Math.floor(worldSize.y * 0.6)] = new Block(0);
         this.blockGrid[27][Math.floor(worldSize.y * 0.6)-1] = new Block(1);
-        this.blockGrid[27][Math.floor(worldSize.y * 0.6)-1].broken = 85;
 
         this.blockGrid[23][worldSize.y-7] = new Block(2);
         this.blockGrid[24][worldSize.y-7] = new Block(2);

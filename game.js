@@ -1,6 +1,9 @@
 class Game {
-    constructor(save=null) {
-        // todo load from file
+    constructor(save, saveName) {
+        this.saveName = "Game"+Date.now().toString().substr(8);
+        if (saveName != null && saveName.length !== 0) {
+            this.saveName = saveName.substring(0, saveName.indexOf(saveFileType));
+        }
         this.world = new World(save);
         this.player = new Player(this.world, save);
         this.playerScreenPos = new AVector(canvas.width/2, canvas.height/2);
@@ -91,5 +94,9 @@ class Game {
         //cx.fillStyle = "rgb(188,82,11)";
         //cx.fillRect(0, 0, canvas.width, canvas.height);
         //cx.restore();
+    }
+
+    save() {
+        return this.world.save() + this.player.save();
     }
 }

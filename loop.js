@@ -55,8 +55,9 @@ function animate(timestamp) {
         cx.textBaseline = "bottom";
         cx.font = sc(40) + "px Arial";
         cx.fillStyle = "black";
-        cx.fillText(drawFPS + " fps; "+Math.floor(gameTime/100)+"; "+Math.round(blockSize*100)/100
+        cx.fillText(drawFPS + " fps; "+Math.floor(gameTime/100)//+"; "+Math.round(blockSize*100)/100
             +"; "+(gameInstance != null ? Math.round(gameInstance.world.day*100)/100 : "-")
+            //+"; "+(gameInstance != null ? gameInstance.player.pos.y : "-")
             , sc(20), canvas.height - sc(20));
     }
 

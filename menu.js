@@ -13,6 +13,10 @@ class Menu {
         this.titleRot = 0;
         this.titleRotSpeed = Math.PI / 55;
         this.titleRotMax = Math.PI / 40;
+
+        this.infoDiffY = 120;
+        this.arrow = new Image();
+        this.arrow.src = resPath + gameStates.mainMenu + "/arrowToGameName" + resFileType;
     }
 
     update(delta) {
@@ -47,18 +51,37 @@ class Menu {
 
         // info
         cx.textAlign = "right";
+        cx.textBaseline = "bottom";
         cx.font = sc(70) + "px Impact";
         cx.fillStyle = "rgb(58,164,76)";
         cx.strokeStyle = "rgb(2,12,4)";
         cx.lineWidth = sc(3.5);
-        cx.fillText("Press '"+keybindings.saveOrGenerateWorld.toUpperCase()+"' to generate a world", canvas.width - sc(70), canvas.height/2 + sc(20));
-        cx.strokeText("Press '"+keybindings.saveOrGenerateWorld.toUpperCase()+"' to generate a world", canvas.width - sc(70), canvas.height/2 + sc(20));
-        cx.fillText("Press '"+keybindings.loadWorld.toUpperCase()+"' to load a world", canvas.width - sc(70), canvas.height/2 + sc(160));
-        cx.strokeText("Press '"+keybindings.loadWorld.toUpperCase()+"' to load a world", canvas.width - sc(70), canvas.height/2 + sc(160));
-        cx.fillText("Press '"+keybindings.toggleSettings.toUpperCase()+"' to open settings", canvas.width - sc(70), canvas.height/2 + sc(300));
-        cx.strokeText("Press '"+keybindings.toggleSettings.toUpperCase()+"' to open settings", canvas.width - sc(70), canvas.height/2 + sc(300));
-        cx.fillText("Press '"+keybindings.toggleFullscreen.toUpperCase()+"' for fullscreen", canvas.width - sc(70), canvas.height/2 + sc(440));
-        cx.strokeText("Press '"+keybindings.toggleFullscreen.toUpperCase()+"' for fullscreen", canvas.width - sc(70), canvas.height/2 + sc(440));
+        // bottom to top
+        let y = 20;
+        cx.fillText("Press '"+keybindings.toggleFullscreen.toUpperCase()+"' for fullscreen", canvas.width - sc(70), canvas.height - sc(y));
+        cx.strokeText("Press '"+keybindings.toggleFullscreen.toUpperCase()+"' for fullscreen", canvas.width - sc(70), canvas.height - sc(y));
+        y += this.infoDiffY;
+        cx.fillText("Press '"+keybindings.toggleSettings.toUpperCase()+"' to open settings", canvas.width - sc(70), canvas.height - sc(y));
+        cx.strokeText("Press '"+keybindings.toggleSettings.toUpperCase()+"' to open settings", canvas.width - sc(70), canvas.height - sc(y));
+        y += this.infoDiffY;
+        cx.fillText("Press '"+keybindings.loadWorld.toUpperCase()+"' to load a world", canvas.width - sc(70), canvas.height - sc(y));
+        cx.strokeText("Press '"+keybindings.loadWorld.toUpperCase()+"' to load a world", canvas.width - sc(70), canvas.height - sc(y));
+        y += this.infoDiffY;
+        cx.fillText("Press '"+keybindings.saveOrGenerateWorld.toUpperCase()+"' to generate a world", canvas.width - sc(70), canvas.height - sc(y));
+        cx.strokeText("Press '"+keybindings.saveOrGenerateWorld.toUpperCase()+"' to generate a world", canvas.width - sc(70), canvas.height - sc(y));
+        if (gameInstance != null) {
+            y += this.infoDiffY;
+            cx.fillText("Press '"+keybindings.exitToMenu.toUpperCase()+"' to continue game", canvas.width - sc(70), canvas.height - sc(y));
+            cx.strokeText("Press '"+keybindings.exitToMenu.toUpperCase()+"' to continue game", canvas.width - sc(70), canvas.height - sc(y));
+            cx.save();
+            cx.translate(sc(590), canvas.height - sc(y + 15));
+            cx.rotate(-0.2);
+            cx.drawImage(this.arrow, 0, 0, sc(200), sc(120));
+            cx.restore();
+            cx.textAlign = "center";
+            cx.font = sc(50) + "px Arial";
+            cx.fillText("\""+gameInstance.saveName+"\"", sc(580), sc(750));
+        }
 
         // world gen info todo activate and test when loading time increases
         if (this.generatingWorld) {

@@ -1,10 +1,10 @@
-const GAME_VERSION = 1;
+const GAME_VERSION = 2;
 const GAME_NAME = "BlockGame";
 
 const canvas = document.getElementById("canvas");
 const cx = canvas.getContext("2d");
 const resPath = "res/", resFileType = ".png";
-const saveFileType = ".block";
+const saveFileType = ".block", saveSeparator = ";";
 
 // game settings and user options
 const timeUnit = 1000;  // 1000 -> speed values etc. are "per second"
@@ -15,18 +15,11 @@ const gameStates = {
     settingsMenu: "settingsMenu",
 }
 
-const worldTime = {
-    dayLength: 60,  // in seconds resp. timeUnits    day starts at 6:00
-    sunrise: [0.9375, 1],      // 4:30 - 6:00
-    sunset: [0.5417, 0.6042],  // 19:00 - 20:30
-}
-let worldSize = new AVector(100, 70);
-
 const settings = {
     dimension: new AVector(0,0),
-    dimensions: [[1920,1080], [1280,720], [800,600], [640,480]],
-    dimScales:  [      [1,1],      [2,3],     [5,9],     [4,9]],
-    dimensionChoice: 0,
+    dimensions: [[3840,2160], [2560,1440], [1920,1080], [1280,720], [960,540], [640,360]],
+    dimScales:  [      [2,1],       [4,3],       [1,1],      [2,3],     [1,2],     [1,3]],
+    dimensionChoice: 2,
     fullscreen: false,
 
     blocksInHeightRange: [17, 54],
@@ -79,31 +72,31 @@ function uploadFile() {
     const input = document.querySelector("input");  // https://www.geeksforgeeks.org/how-to-load-the-contents-of-a-text-file-into-a-javascript-variable/
     input.addEventListener('change', function() {
         let files = input.files;
-        if (files.length === 0) return;
-        /* If any further modifications have to be made on the
-           Extracted text. The text can be accessed using the
-           file variable. But since this is const, it is a read
-           only variable, hence immutable. To make any changes,
-           changing const to var, here and In the reader.onload
-           function would be advisable */
-
+        if (files.length === 0) {
+            return;
+        }
         const file = files[0];
         if (!file.name.includes(saveFileType)) {
             alert("File must be of '"+saveFileType+"' type!");
             return;
         }
-
         let reader = new FileReader();
         reader.onload = function(e) {
-            const file = e.target.result;
-            // This is a regular expression to identify carriage
-            const lines = file.split(/\r\n|\n/);
+            const fileContent = e.target.result;
+            const lines = fileContent.split(/\r\n|\n/);  // Regex to identify carriage
 
-            console.log(lines.join("; "))   // TODO use data
+            if (!checkSaveFile(lines[0])) {
+                alert("File (version "+lines[0]+") is older than lowest supported version ("+saveFileLowestSupportedVersion+")");
+            } else {
+                initGame(lines, file.name);
+            }
 
             document.body.removeChild(element);
         };
-        reader.onerror = (e) => alert(e.target.error.name);
+        reader.onerror = function (e) {
+            document.body.removeChild(element);
+            alert(e.target.error.name);
+        };
         reader.readAsText(file);
     });
 }

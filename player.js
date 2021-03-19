@@ -4,7 +4,9 @@ class Player {
 
         this.gravity = 60;
 
-        this.pos = new AVector(40, 30);
+        // TODO load from save
+
+        this.pos = this.wld.worldSpawn.clone();
         this.vel = new AVector(0, 0);
         this.acc = new AVector(0, this.gravity);
 
@@ -267,5 +269,9 @@ class Player {
 
 
     load(save) {
+    }
+
+    save() {
+        return "";
     }
 }

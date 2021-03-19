@@ -1,9 +1,17 @@
 const menuInstance = new Menu();
 const settingsInstance = new Settings();
-let gameInstance = null;
+let gameInstance;
 
 let gameState = gameStates.mainMenu;
 let prevGameState = gameStates.mainMenu;
+
+function initGame(save=null, saveName="") {
+    menuInstance.generatingWorld = true;
+    gameInstance = new Game(save, saveName);
+    menuInstance.generatingWorld = false;
+    prevGameState = gameState;
+    gameState = gameStates.inGame;
+}
 
 const mouse = {
     pos: new AVector(0, 0),
@@ -112,15 +120,11 @@ function handleKeyDown(key) {
     }
     // save/generate world
     else if (key === keybindings.saveOrGenerateWorld) {
-        if (gameState === gameStates.inGame) {
+        if (gameState === gameStates.inGame && gameInstance != null) {
             disableUserInputs();
-            downloadFile("test.block", "abc\n123");
+            downloadFile(gameInstance.saveName + saveFileType, gameInstance.save());
         } else if (gameState === gameStates.mainMenu) {
-            menuInstance.generatingWorld = true;
-            gameInstance = new Game();
-            menuInstance.generatingWorld = false;
-            prevGameState = gameState;
-            gameState = gameStates.inGame;
+            initGame();
         }
     }
     // exit to main menu

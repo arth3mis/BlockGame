@@ -1,4 +1,4 @@
-const GAME_VERSION = 3;
+const GAME_VERSION = 4;
 const GAME_NAME = "BlockGame";
 
 const canvas = document.getElementById("canvas");
@@ -88,7 +88,8 @@ function uploadFile() {
             if (!checkSaveFile(lines[0])) {
                 alert("File (version "+lines[0]+") is older than lowest supported version ("+saveFileLowestSupportedVersion+")");
             } else {
-                initGame(lines, file.name);
+                lines.unshift(file.name);
+                initGame(lines);
             }
 
             document.body.removeChild(element);

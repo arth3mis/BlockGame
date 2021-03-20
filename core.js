@@ -6,17 +6,16 @@ let gameState = gameStates.mainMenu;
 let prevGameState = gameStates.mainMenu;
 
 // todo call initGame from loop if loadGamePrompt
-//  load: get confirmation, esp. if a game is already loaded (maybe make 'save current and load new' option) - generate: choose game name, worldSize etc.
+//  load: get confirmation, esp. if a game is already loaded (maybe make 'save current and load new' option) - generate: choose game name (or not?), worldSize etc.
 let loadGamePrompt = false;
 let gameSaveInput = null;
-let gameSaveNameInput = null;
 
 let lastKeyboardInput;
-let waitingForKeyboardInput = false;  // todo hold everything until input done, request method can access input -> lastKeyboardInput
+let waitingForKeyboardInput = false;  // todo hold everything until input done, request method can access input -> lastKeyboardInput (use for key rebinds)
 
-function initGame(save=null, saveName="") {
+function initGame(save=null) {
     menuInstance.generatingWorld = true;
-    gameInstance = new Game(save, saveName);
+    gameInstance = new Game(save);
     menuInstance.generatingWorld = false;
     prevGameState = gameState;
     gameState = gameStates.inGame;

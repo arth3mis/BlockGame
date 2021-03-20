@@ -80,16 +80,18 @@ class World {
 
 
     load(save) {
-        let s = save[2].split(saveSeparator);
+        const preBlockDataLines = 3;
+
+        let s = save[0].split(saveSeparator);
         worldSize = new AVector(parseInt(s[0]), parseInt(s[1]));
-        this.day = parseFloat(save[3]);
-        s = save[4].split(saveSeparator);
+        this.day = parseFloat(save[1]);
+        s = save[2].split(saveSeparator);
         this.worldSpawn = new AVector(parseInt(s[0]), parseInt(s[1]));
         // block data
         this.blockGrid = new Array(worldSize.x);
         for (let x = 0; x < worldSize.x; x++) {
             this.blockGrid[x] = new Array(worldSize.y);
-            s = save[5 + x].split(saveSeparator);
+            s = save[preBlockDataLines + x].split(saveSeparator);
             for (let y = 0; y < worldSize.y; y++) {
                 this.blockGrid[x][y] = new Block(parseInt(s[y]));
             }

@@ -1,18 +1,18 @@
 class Game {
-    constructor(save, saveName) {
-        this.saveName = "Game"+Date.now().toString().substr(8);
-        if (saveName != null && saveName.length !== 0) {
-            this.saveName = saveName.substring(0, saveName.indexOf(saveFileType));
-        }
+    constructor(save) {
         let worldSave = null;
         let playerSave = null;
+        this.saveName = "Game"+Date.now().toString().substr(8);
+
         if (save != null) {
+            this.saveName = save[0].substring(0, save[0].indexOf(saveFileType));
+            save.shift();  // removes file name from array
             let i;
             for (i = 0; i < save.length; i++) {
                 if (save[i] === playerSaveSeparator)
                     break;
             }
-            worldSave = save.slice(1, i);
+            worldSave = save.slice(1, i);  // line 0 is game version (evaluated in preloadCore/uploadFile())
             playerSave = save.slice(i+1);
         }
         this.world = new World(worldSave);
@@ -109,7 +109,7 @@ class Game {
 
     save() {
         return GAME_VERSION +"\n"+
-            gameInstance.saveName +"\n"+
+            //gameInstance.saveName +"\n"+
             this.world.save() +
             this.player.save();
     }

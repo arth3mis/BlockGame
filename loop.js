@@ -3,7 +3,6 @@ let gameTime = 0;
 
 let timeStep = 1000 / 60;
 let panicThreshold = 4 * 1000 / timeStep;  // panics if 4*60 updates are queued
-let panicsCount = 0;
 let timeLastFrame = 0;
 let timeDelta = 0;
 
@@ -19,17 +18,21 @@ function animate(timestamp) {
     cx.clearRect(0, 0, canvas.width, canvas.height);
 
     // update and draw
-    timeDelta += timestamp - timeLastFrame;
-    let updateCount = 0;
-    while (timeDelta >= timeStep) {
-        update(timeStep);
-        timeDelta -= timeStep;
-        if (++updateCount >= panicThreshold) {
-            panic();
-            timeDelta = 0;
-            timeLastFrame = timestamp;
-            break;
+    if (gameState === gameStates.mainMenu || gameState === gameStates.inGame) {
+        timeDelta += timestamp - timeLastFrame;
+        let updateCount = 0;
+        while (timeDelta >= timeStep) {
+            update(timeStep);
+            timeDelta -= timeStep;
+            if (++updateCount >= panicThreshold) {
+                panic();
+                timeDelta = 0;
+                timeLastFrame = timestamp;
+                break;
+            }
         }
+    } else {  // settingsMenu
+        update();
     }
     draw();
 
@@ -43,7 +46,6 @@ function animate(timestamp) {
 
     timeLastFrame = timestamp;
 
-    // todo dev fps
     if (settings.displayFps) {
         checks++;
         if (checks > 20) {
@@ -51,6 +53,7 @@ function animate(timestamp) {
             lastCheck = Date.now();
             checks = 0;
         }
+        // todo dev draw info with fps
         cx.textAlign = "left";
         cx.textBaseline = "bottom";
         cx.font = sc(40) + "px Arial";
@@ -66,7 +69,7 @@ function animate(timestamp) {
 }
 requestAnimationFrame(animate);
 
-function update(delta) {
+function update(delta=0) {
     switch (gameState) {
         case "mainMenu":
             menuInstance.update(delta);
@@ -75,7 +78,7 @@ function update(delta) {
             gameInstance.update(delta);
             break;
         case "settingsMenu":
-            settingsInstance.update(delta);
+            settingsInstance.update();
             break;
     }
 }
@@ -100,7 +103,7 @@ function draw() {
     }
 }
 
-function panic() {
-    panicsCount++;
-    alert("Timeout - Click OK to continue the game");
+function panic() {  // go to settings menu which is not time-dependant and thus failsafe
+    prevGameState = gameState;
+    gameState = gameStates.settingsMenu;
 }

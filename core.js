@@ -5,6 +5,15 @@ let gameInstance;
 let gameState = gameStates.mainMenu;
 let prevGameState = gameStates.mainMenu;
 
+// todo call initGame from loop if loadGamePrompt
+//  load: get confirmation, esp. if a game is already loaded (maybe make 'save current and load new' option) - generate: choose game name, worldSize etc.
+let loadGamePrompt = false;
+let gameSaveInput = null;
+let gameSaveNameInput = null;
+
+let lastKeyboardInput;
+let waitingForKeyboardInput = false;  // todo hold everything until input done, request method can access input -> lastKeyboardInput
+
 function initGame(save=null, saveName="") {
     menuInstance.generatingWorld = true;
     gameInstance = new Game(save, saveName);
@@ -120,14 +129,14 @@ function handleKeyDown(key) {
     }
     // save/generate world
     else if (key === keybindings.saveOrGenerateWorld) {
-        if (gameState === gameStates.inGame && gameInstance != null) {
+        if (gameState === gameStates.inGame) {
             disableUserInputs();
             downloadFile(gameInstance.saveName + saveFileType, gameInstance.save());
         } else if (gameState === gameStates.mainMenu) {
             initGame();
         }
     }
-    // exit to main menu
+    // exit to main menu/continue loaded world
     if (key === keybindings.exitToMenu) {
         if (gameState === gameStates.inGame) {
             disableUserInputs();

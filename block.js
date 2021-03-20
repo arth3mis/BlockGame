@@ -18,6 +18,10 @@ class Particle {
     }
 }
 
+
+// LOGIC: 0 is air, not included in block BLOCKS_NUMBER, but still the id.
+const BLOCKS_NUMBER = 2;  // how many blocks exist
+
 class Block {
     constructor(id) {
         this.id = id;

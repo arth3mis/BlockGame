@@ -51,6 +51,28 @@ class Player {
         //this.colorH = 0;
         //this.color = "hsl(0,70%,55%)";
         //this.colorCycleTime = 20;
+
+        this.upgradeRules = {
+            addMaxVelXSteps: 1,
+            addMaxVelXMax: 5,  // max steps
+            addJumpVelSteps: -1,
+            addJumpVelMax: 5,  // max steps
+        }
+        this.upgrades = {
+            addMaxVelX: 0,  // steps
+            autoJump: false,
+            addJumpsPossible: 0,
+            addJumpVel: 0,  // steps
+        }
+
+        this.inventory = new Array(10);  // columns
+        for (let i = 0; i < this.inventory.length; i++) {
+            this.inventory[i] = new Array(5);  // rows (row 0 is hotbar)
+        }
+
+        if (save != null) {
+            this.load(save);
+        }
     }
 
     update(T) {
@@ -269,9 +291,18 @@ class Player {
 
 
     load(save) {
+        this.upgrades.addMaxVelX = parseInt(save[0]);
+        this.upgrades.autoJump = (save[1] === "true");
+        this.upgrades.addJumpsPossible = parseInt(save[2]);
+        this.upgrades.addJumpVel = parseInt(save[3]);
     }
 
     save() {
-        return "";
+        let s = playerSaveSeparator +"\n";
+        for (const u in this.upgrades) {
+            if (this.upgrades.hasOwnProperty(u))
+                s += this.upgrades[u] +"\n";
+        }
+        return s;
     }
 }

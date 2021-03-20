@@ -11,7 +11,7 @@ const worldTime = {
     sunset: [0.5417, 0.6042],  // 19:00 - 20:30
 }
 
-const saveFileLowestSupportedVersion = 2;
+const saveFileLowestSupportedVersion = 3;
 function checkSaveFile(versionLine) {
     let v = parseInt(versionLine);
     return v >= saveFileLowestSupportedVersion;
@@ -30,7 +30,7 @@ class World {
         this.background.addColorStop(1, "rgb(103,112,112)");
 
         this.loadedGraphics = null;
-        this.blockSprites = new Array(2);
+        this.blockSprites = new Array(BLOCKS_NUMBER);
         this.blockDestructionSprites = new Array(10);
         this.loadSprites();
     }
@@ -40,15 +40,16 @@ class World {
         if (settings.graphicsChoice < settings.worldBlockSpriteSizes.length) {
             graphicsFile = settings.graphicsRange[settings.graphicsChoice].toLowerCase();
         } else if (settings.graphicsChoice === settings.worldBlockSpriteSizes.length) {
-            graphicsFile = settings.graphicsRange[this.findClosestSpriteSize(true)];
+            graphicsFile = settings.graphicsRange[this.findClosestSpriteSize(true)].toLowerCase();
         } else if (settings.graphicsChoice === settings.worldBlockSpriteSizes.length + 1) {
-            graphicsFile = settings.graphicsRange[this.findClosestSpriteSize(false)];
+            graphicsFile = settings.graphicsRange[this.findClosestSpriteSize(false)].toLowerCase();
         }
-        if (graphicsFile === this.loadedGraphics) {
+        if (graphicsFile === this.loadedGraphics) {  // chosen graphics are already loaded
             return;
         }
+        this.loadedGraphics = graphicsFile;
 
-        for (let i = 0; i < this.blockSprites.length; i++) {
+        for (let i = 0; i < BLOCKS_NUMBER; i++) {
             this.blockSprites[i] = new Image();
             this.blockSprites[i].src = resPath + "b" + (i+1) + "/" + graphicsFile + resFileType;
         }
@@ -96,9 +97,7 @@ class World {
     }
 
     save() {
-        let s = GAME_VERSION +"\n"+
-            gameInstance.saveName +"\n"+
-            worldSize.x + saveSeparator + worldSize.y +"\n"+
+        let s = worldSize.x + saveSeparator + worldSize.y +"\n"+
             this.day +"\n"+
             this.worldSpawn.x + saveSeparator + this.worldSpawn.y +"\n";
         // block data
@@ -108,7 +107,7 @@ class World {
             }
             s += "\n";
         }
-        return s;
+        return s;  // always end with "\n"
     }
 
     generate() {

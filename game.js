@@ -4,8 +4,19 @@ class Game {
         if (saveName != null && saveName.length !== 0) {
             this.saveName = saveName.substring(0, saveName.indexOf(saveFileType));
         }
-        this.world = new World(save);
-        this.player = new Player(this.world, save);
+        let worldSave = null;
+        let playerSave = null;
+        if (save != null) {
+            let i;
+            for (i = 0; i < save.length; i++) {
+                if (save[i] === playerSaveSeparator)
+                    break;
+            }
+            worldSave = save.slice(1, i);
+            playerSave = save.slice(i+1);
+        }
+        this.world = new World(worldSave);
+        this.player = new Player(this.world, playerSave);
         this.playerScreenPos = new AVector(canvas.width/2, canvas.height/2);
     }
 
@@ -33,7 +44,7 @@ class Game {
                 if ((blockUnderMouse.x > 0 && this.world.blockGrid[blockUnderMouse.x-1][blockUnderMouse.y].id !== 0) ||
                     (blockUnderMouse.x < worldSize.x-1 && this.world.blockGrid[blockUnderMouse.x+1][blockUnderMouse.y].id !== 0) ||
                     (blockUnderMouse.y > 0 && this.world.blockGrid[blockUnderMouse.x][blockUnderMouse.y-1].id !== 0) ||
-                    (blockUnderMouse.x < worldSize.x-1 && this.world.blockGrid[blockUnderMouse.x][blockUnderMouse.y+1].id !== 0)) {
+                    (blockUnderMouse.y < worldSize.y-1 && this.world.blockGrid[blockUnderMouse.x][blockUnderMouse.y+1].id !== 0)) {
                     // do not place on player
                     if ((Math.abs(this.player.pos.x - blockUnderMouse.x) >= this.player.radius &&
                          Math.abs(this.player.pos.x - blockUnderMouse.x - 1) >= this.player.radius) ||
@@ -97,6 +108,9 @@ class Game {
     }
 
     save() {
-        return this.world.save() + this.player.save();
+        return GAME_VERSION +"\n"+
+            gameInstance.saveName +"\n"+
+            this.world.save() +
+            this.player.save();
     }
 }

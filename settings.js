@@ -21,8 +21,9 @@ class Settings {
         this.buttons = [
             "Resolution",
             "Graphics",
-            "Zoom"
-            // TODO keybindings
+            "Keybindings",
+            "Zoom",
+            // TODO display fps
         ];
         this.stdButtonTexts = [];
         for (let i = 0; i < this.buttons.length; i++) {
@@ -34,7 +35,7 @@ class Settings {
         this.buttonClicked = -1;
     }
 
-    update(delta) {
+    update() {
         this.size.set(canvas.height * this.heightP * this.widthP, canvas.height * this.heightP);
         let relativeMouse = new AVector(mouse.pos.x - canvas.width/2, mouse.pos.y - canvas.height/2);
         if (Math.abs(relativeMouse.x) < this.size.x/2 && relativeMouse.y >= this.size.y * this.titleHeightP - this.size.y/2 && relativeMouse.y < this.size.y/2) {
@@ -47,6 +48,7 @@ class Settings {
                         this.buttonClicked = this.buttonHovered;
                         // switch to new settings page
                         switch (this.buttonClicked) {
+                            // resolution
                             case 0:
                                 this.title = "Current: " + settings.dimension.x + "x" + settings.dimension.y;
                                 this.buttonTexts = [];
@@ -55,6 +57,7 @@ class Settings {
                                 }
                                 this.buttonTexts.push("Back");
                                 break;
+                            // graphics
                             case 1:
                                 this.title = "Current: " + settings.graphicsRange[settings.graphicsChoice].replace(" (recommended)", "");
                                 this.buttonTexts = [];
@@ -63,7 +66,27 @@ class Settings {
                                 }
                                 this.buttonTexts.push("Back");
                                 break;
+                            // keybindings
                             case 2:
+                                this.title = "Keybindings";
+                                this.buttonTexts = [];
+                                for (const u in keybindings) {
+                                    if (keybindings.hasOwnProperty(u)) {
+                                        const c = u.replaceAll(/[a-z]/g, "");
+                                        console.log(c)
+                                        let s = u.replaceAll(/[A-Z]/g, " ");
+                                        for (let i = 0, p = 0; i < c.length; i++) {
+                                            p = s.indexOf(" ", p) + 1;
+                                            s = s.substring(0, p) + c.charAt(i).toLowerCase() + s.substring(p);
+                                        }
+                                        s = s.charAt(0).toUpperCase() + s.substr(1);
+                                        this.buttonTexts.push(s + ": '" + (keybindings[u] === " " ? "SPACE" : keybindings[u].toUpperCase()) + "'");
+                                    }
+                                }
+                                this.buttonTexts.push("Back");
+                                break;
+                            // zoom
+                            case 3:
                                 this.title = "Current: " + Math.round((1 + settings.zoomFactorChoice)*10)/10;
                                 this.buttonTexts = [];
                                 for (let i = 1; i <= 2; i = Math.round((i + 0.1)*10)/10) {
@@ -104,8 +127,15 @@ class Settings {
                         }
                         this.title = "Current: " + settings.graphicsRange[settings.graphicsChoice].replace(" (recommended)", "");
                         break;
-                    // zoom
+                    // keybindings
                     case 2:
+                        if (this.buttonHovered === this.buttonTexts.length - 1) {
+                            this.setMainPage();
+                            break;
+                        }
+                        break;
+                    // zoom
+                    case 3:
                         if (this.buttonHovered === this.buttonTexts.length - 1) {
                             this.setMainPage();
                             break;

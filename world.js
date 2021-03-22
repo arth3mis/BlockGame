@@ -11,6 +11,9 @@ const worldTime = {
     sunset: [0.5417, 0.6042],  // 19:00 - 20:30
 }
 
+let lightBaseValue = 0.25;
+let lightThreshold = 0.06;  // TODO balance
+
 const saveFileLowestSupportedVersion = 3;
 function checkSaveFile(versionLine) {
     let v = parseInt(versionLine);
@@ -24,6 +27,8 @@ class World {
         } else {
             this.load(save);
         }
+        this.updateLighting([0, worldSize.x-1, 0, worldSize.y-1]);  // generate lighting for whole world
+
         this.background = cx.createLinearGradient(0, 0, 0, canvas.height);
         this.background.addColorStop(0, "rgb(157,176,174)");
         this.background.addColorStop(0.4, "rgb(127,140,139)");
@@ -76,6 +81,36 @@ class World {
 
     update(T) {
         this.day += T / worldTime.dayLength;
+    }
+
+    updateLighting(visibleBounds) {  // TODO
+        for (let x = visibleBounds[0]; x <= visibleBounds[1]; x++) {
+            for (let y = visibleBounds[2]; y <= visibleBounds[3]; y++) {
+                if (this.blockGrid[x][y].needsLightingUpdate()) {
+                    if (this.blockGrid[x][y].prevLightEmission[0] >= 0) {  // dont execute on first lighting
+                        this.lightingCalc(x, y, this.blockGrid[x][y].prevLightEmission[0], this.blockGrid[x][y].prevLightEmission[1], -1);  // reverse previous lighting
+                    }
+                    this.lightingCalc(x, y, this.blockGrid[x][y].lightEmission[0], this.blockGrid[x][y].lightEmission[1], 1);
+                    this.blockGrid[x][y].prevLightEmission = this.blockGrid[x][y].lightEmission.slice();
+                }
+            }
+        }
+    }
+
+    lightingCalc(x, y, strength, radius, sign) {
+        for (let i = -radius; i < radius+1; i++) {
+            for (let j = -radius; j < radius+1; j++) {
+                if (x+i < 0 || x+i >= worldSize.x || y+j < 0 || y+j >= worldSize.y) {
+                    continue;
+                }
+                if (Math.sqrt(i*i + j*j) !== 0) {
+                    let a = sign * (lightBaseValue * strength / Math.sqrt(i*i + j*j));
+                    if (Math.abs(a) >= lightThreshold) {  // dont add too little light
+                        this.blockGrid[x+i][y+j].light += a;
+                    }
+                }
+            }
+        }
     }
 
 
@@ -153,6 +188,8 @@ class World {
         this.blockGrid[26][Math.floor(worldSize.y * 0.6)] = new Block(0);
         this.blockGrid[27][Math.floor(worldSize.y * 0.6)] = new Block(0);
         this.blockGrid[27][Math.floor(worldSize.y * 0.6)-1] = new Block(1);
+
+        this.blockGrid[40][Math.floor(worldSize.y * 0.6)+10] = new Block(0);
 
         this.blockGrid[23][worldSize.y-7] = new Block(2);
         this.blockGrid[24][worldSize.y-7] = new Block(2);

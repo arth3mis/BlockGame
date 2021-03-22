@@ -57,7 +57,7 @@ function animate(timestamp) {
         cx.textAlign = "left";
         cx.textBaseline = "bottom";
         cx.font = sc(40) + "px Arial";
-        cx.fillStyle = "black";
+        cx.fillStyle = "white";
         cx.fillText(drawFPS + " fps; "+Math.floor(gameTime/100)//+"; "+Math.round(blockSize*100)/100
             +"; "+(gameInstance != null ? Math.round(gameInstance.world.day*100)/100 : "-")
             //+"; "+(gameInstance != null ? gameInstance.player.pos.y : "-")

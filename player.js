@@ -44,8 +44,10 @@ class Player {
         this.inAir = false;
         this.inAirStart = 0;
 
+        // building
+        this.buildingRange = [3, 2, 4];  // top, bottom, LR
 
-        this.radius = 0.75;  // must be below 1 (collision is not fail-proof for every size)
+        this.radius = 0.75;  // must be ]0.5;1] (collision is not fail-proof for every size) -> radii over 1 work pretty well, only need to fix x collision
 
         this.color = "rgb(94,248,245)";
         //this.colorH = 0;
@@ -68,6 +70,9 @@ class Player {
         this.inventory = new Array(10);  // columns
         for (let i = 0; i < this.inventory.length; i++) {
             this.inventory[i] = new Array(5);  // rows (row 0 is hotbar)
+            for (let j = 0; j < this.inventory[i].length; j++) {
+                this.inventory[i][j] = new Item();
+            }
         }
 
         if (save != null) {

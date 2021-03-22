@@ -48,13 +48,22 @@ class Game {
                     // do not place on player
                     if ((Math.abs(this.player.pos.x - blockUnderMouse.x) >= this.player.radius &&
                          Math.abs(this.player.pos.x - blockUnderMouse.x - 1) >= this.player.radius) ||
-                        (Math.abs(this.player.pos.y - blockUnderMouse.y) >= this.player.radius &&
+                        (Math.abs(this.player.pos.y - blockUnderMouse.y) >= this.player.radius * 0.95 &&  // 5% tolerance for block below (if hanging slightly over edge)
                          Math.abs(this.player.pos.y - blockUnderMouse.y - 1) >= this.player.radius)) {
                         this.world.blockGrid[blockUnderMouse.x][blockUnderMouse.y].turnToBlock(2);
                     }
                 }
             }
         }
+
+        // lighting
+        let visibleBounds = [
+            Math.max(0, Math.floor(this.player.pos.x - this.playerScreenPos.x/blockSize)),
+            Math.min(worldSize.x-1, Math.floor(this.player.pos.x + (canvas.width-this.playerScreenPos.x)/blockSize)),
+            Math.max(0, Math.floor(this.player.pos.y - this.playerScreenPos.y/blockSize)),
+            Math.min(worldSize.y-1, Math.floor(this.player.pos.y + (canvas.height-this.playerScreenPos.y)/blockSize))
+        ];
+        this.world.updateLighting(visibleBounds);
     }
 
     setPlayerScreenPos() {
@@ -78,15 +87,31 @@ class Game {
         cx.fillRect(0, 0, canvas.width, canvas.height);
 
         // draw world that is on screen
-        for (let i = Math.max(0, Math.floor(this.player.pos.x - this.playerScreenPos.x/blockSize));
-             i <= Math.min(worldSize.x-1, Math.floor(this.player.pos.x + (canvas.width-this.playerScreenPos.x)/blockSize)); i++) {
-            for (let j = Math.max(0, Math.floor(this.player.pos.y - this.playerScreenPos.y/blockSize));
-                 j <= Math.min(worldSize.y-1, Math.floor(this.player.pos.y + (canvas.height-this.playerScreenPos.y)/blockSize)); j++) {
-                if (this.world.blockGrid[i][j].id !== 0) {
-                    cx.drawImage(this.world.blockSprites[this.world.blockGrid[i][j].id - 1], this.playerScreenPos.x + (i - this.player.pos.x) * blockSize, this.playerScreenPos.y + (j - this.player.pos.y) * blockSize, blockSize, blockSize);
-                    if (this.world.blockGrid[i][j].broken > 0) {
-                        cx.drawImage(this.world.blockDestructionSprites[Math.ceil(this.world.blockGrid[i][j].broken / this.world.blockDestructionSprites.length) - 1], this.playerScreenPos.x + (i - this.player.pos.x) * blockSize, this.playerScreenPos.y + (j - this.player.pos.y) * blockSize, blockSize, blockSize);
+        for (let x = Math.max(0, Math.floor(this.player.pos.x - this.playerScreenPos.x/blockSize));
+             x <= Math.min(worldSize.x-1, Math.floor(this.player.pos.x + (canvas.width-this.playerScreenPos.x)/blockSize)); x++) {
+            for (let y = Math.max(0, Math.floor(this.player.pos.y - this.playerScreenPos.y/blockSize));
+                 y <= Math.min(worldSize.y-1, Math.floor(this.player.pos.y + (canvas.height-this.playerScreenPos.y)/blockSize)); y++) {
+                if (this.world.blockGrid[x][y].id !== 0) {
+                    cx.save();
+                    cx.translate(this.playerScreenPos.x + (x - this.player.pos.x) * blockSize, this.playerScreenPos.y + (y - this.player.pos.y) * blockSize);
+                    if (this.world.blockGrid[x][y].light <= 0) {
+                        // draw shadow instead of block
+                        cx.fillStyle = "black";
+                        cx.fillRect(0, 0, blockSize, blockSize); // todo here and in light/shadow: add block coverage (-0.4;+0.3 maybe?)
+                    } else {
+                        // block sprite
+                        cx.drawImage(this.world.blockSprites[this.world.blockGrid[x][y].id - 1], 0, 0, blockSize, blockSize);
+                        // break animation sprite
+                        if (this.world.blockGrid[x][y].broken > 0) {
+                            cx.drawImage(this.world.blockDestructionSprites[Math.ceil(this.world.blockGrid[x][y].broken / this.world.blockDestructionSprites.length) - 1], 0, 0, blockSize, blockSize);
+                        }
+                        // light/shadow
+                        if (this.world.blockGrid[x][y].light < 1) {
+                            cx.fillStyle = "rgba(0,0,0," + (1 - this.world.blockGrid[x][y].light) + ")";
+                            cx.fillRect(0, 0, blockSize, blockSize);
+                        }
                     }
+                    cx.restore();
                 }
             }
         }

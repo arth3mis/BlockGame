@@ -26,6 +26,11 @@ class Block {
     constructor(id) {
         this.id = id;
         this.broken = 0;  // [0;100]
+        this.light = 0;
+        this.lightEmission = [0, 0];
+        this.prevLightEmission = [-1, 0];
+
+        this.useSprite = 0;
         this.particles = [];
         this.BLOCKS();
     }
@@ -33,19 +38,26 @@ class Block {
     break(value) {
         this.broken += value;
         if (this.broken >= 100) {
-            this.turnToAir();
+            this.turnToBlock(0);
         }
         // todo add particles based on value
     }
 
-    turnToAir() {
-        this.id = 0;
-        this.broken = 0;
-    }
-
     turnToBlock(id) {
         this.id = id;
+        this.broken = 0;
+        this.prevLightEmission = this.lightEmission.slice();
+        this.lightEmission = [0, 0];  // standard (overridden by e.g. air)
         this.BLOCKS();
+    }
+
+    needsLightingUpdate() {
+        for (let i = 0; i < this.lightEmission.length; i++) {
+            if (this.lightEmission[i] !== this.prevLightEmission[i]) {
+                return true;
+            }
+        }
+        return false;
     }
 
     setupBlock(particleColors) {
@@ -54,7 +66,11 @@ class Block {
 
     BLOCKS() {
         switch (this.id) {
+            // air
+            case 0: this.lightEmission = [1, 4]; break;
+            // dirt
             case 1: this.setupBlock(["rgb(255,124,39)"]); break;
+            // stone
             case 2: this.setupBlock(["rgb(114,46,165)"]); break;
         }
     }

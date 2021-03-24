@@ -12,9 +12,10 @@ const worldTime = {
 }
 
 let lightBaseValue = 0.25;
-let lightThreshold = 0.06;  // TODO balance
+const lightThreshold = 0.06;  // TODO balance
+const lightRoundToZero = 1e-6;
 
-const saveFileLowestSupportedVersion = 3;
+const saveFileLowestSupportedVersion = 6;
 function checkSaveFile(versionLine) {
     let v = parseInt(versionLine);
     return v >= saveFileLowestSupportedVersion;
@@ -30,33 +31,29 @@ class World {
         this.updateLighting([0, worldSize.x-1, 0, worldSize.y-1]);  // generate lighting for whole world
 
         this.background = cx.createLinearGradient(0, 0, 0, canvas.height);
-        this.background.addColorStop(0, "rgb(157,176,174)");
-        this.background.addColorStop(0.4, "rgb(127,140,139)");
-        this.background.addColorStop(1, "rgb(103,112,112)");
+        this.background.addColorStop(0, "rgb(91,168,217)");
+        this.background.addColorStop(0.4, "rgb(75,137,177)");
+        this.background.addColorStop(1, "rgb(67,123,159)");
 
         this.loadedGraphics = null;
         this.blockSprites = new Array(BLOCKS_NUMBER);
         this.blockDestructionSprites = new Array(10);
-        this.loadSprites();
+        this.loadBlockSprites();
     }
 
-    loadSprites() {
-        let graphicsFile = "error";
-        if (settings.graphicsChoice < settings.worldBlockSpriteSizes.length) {
-            graphicsFile = settings.graphicsRange[settings.graphicsChoice].toLowerCase();
-        } else if (settings.graphicsChoice === settings.worldBlockSpriteSizes.length) {
-            graphicsFile = settings.graphicsRange[this.findClosestSpriteSize(true)].toLowerCase();
-        } else if (settings.graphicsChoice === settings.worldBlockSpriteSizes.length + 1) {
-            graphicsFile = settings.graphicsRange[this.findClosestSpriteSize(false)].toLowerCase();
-        }
+    loadBlockSprites() {  // todo move to game.js
+        let graphicsFile = getChosenGraphicsFile();
         if (graphicsFile === this.loadedGraphics) {  // chosen graphics are already loaded
             return;
         }
         this.loadedGraphics = graphicsFile;
 
         for (let i = 0; i < BLOCKS_NUMBER; i++) {
-            this.blockSprites[i] = new Image();
-            this.blockSprites[i].src = resPath + "b" + (i+1) + "/" + graphicsFile + resFileType;
+            this.blockSprites[i] = [];
+            for (let j = 0; j < BLOCKS_SPRITE_VARIATIONS[i]; j++) {
+                this.blockSprites[i].push(new Image());
+                this.blockSprites[i][j].src = resPath + "b" + (i+1) + "/" + j + "/" + graphicsFile + resFileType;
+            }
         }
         for (let i = 0; i < this.blockDestructionSprites.length; i++) {
             this.blockDestructionSprites[i] = new Image();
@@ -64,30 +61,15 @@ class World {
         }
     }
 
-    findClosestSpriteSize(roundUp) {
-        for (let i = 0; i < settings.worldBlockSpriteSizes.length; i++) {
-            if (blockSize >= settings.worldBlockSpriteSizes[i]) {
-                // get the middle between sizes
-                if (i > 0 && roundUp /*blockSize >= (settings.worldBlockSpriteSizes[i-1] + settings.worldBlockSpriteSizes[i]) / 2*/) {
-                    return i-1;
-                } else {
-                    return i;
-                }
-            }
-        }
-        // blockSize < settings.worldBlockSpriteSizes[settings.worldBlockSpriteSizes.length - 1]
-        return settings.worldBlockSpriteSizes.length - 1;
-    }
-
     update(T) {
         this.day += T / worldTime.dayLength;
     }
 
-    updateLighting(visibleBounds) {  // TODO
+    updateLighting(visibleBounds) {
         for (let x = visibleBounds[0]; x <= visibleBounds[1]; x++) {
             for (let y = visibleBounds[2]; y <= visibleBounds[3]; y++) {
                 if (this.blockGrid[x][y].needsLightingUpdate()) {
-                    if (this.blockGrid[x][y].prevLightEmission[0] >= 0) {  // dont execute on first lighting
+                    if (typeof this.blockGrid[x][y].prevLightEmission[0] === "number") {  // dont execute on first lighting
                         this.lightingCalc(x, y, this.blockGrid[x][y].prevLightEmission[0], this.blockGrid[x][y].prevLightEmission[1], -1);  // reverse previous lighting
                     }
                     this.lightingCalc(x, y, this.blockGrid[x][y].lightEmission[0], this.blockGrid[x][y].lightEmission[1], 1);
@@ -100,13 +82,16 @@ class World {
     lightingCalc(x, y, strength, radius, sign) {
         for (let i = -radius; i < radius+1; i++) {
             for (let j = -radius; j < radius+1; j++) {
-                if (x+i < 0 || x+i >= worldSize.x || y+j < 0 || y+j >= worldSize.y) {
+                if (x+i < 0 || x+i >= worldSize.x || y+j < 0 || y+j >= worldSize.y) {  // update outside of visibleBounds, too
                     continue;
                 }
                 if (Math.sqrt(i*i + j*j) !== 0) {
                     let a = sign * (lightBaseValue * strength / Math.sqrt(i*i + j*j));
                     if (Math.abs(a) >= lightThreshold) {  // dont add too little light
                         this.blockGrid[x+i][y+j].light += a;
+                    }
+                    if (this.blockGrid[x+i][y+j].light > 0 && this.blockGrid[x+i][y+j].light < lightRoundToZero) {  // floor too small values to 0
+                        this.blockGrid[x+i][y+j].light = 0;
                     }
                 }
             }
@@ -115,12 +100,14 @@ class World {
 
 
     load(save) {
-        const preBlockDataLines = 3;
+        const preBlockDataLines = 4;
 
-        let s = save[0].split(saveSeparator);
+        let l = 0;
+        let s = save[l++].split(saveSeparator);
         worldSize = new AVector(parseInt(s[0]), parseInt(s[1]));
-        this.day = parseFloat(save[1]);
-        s = save[2].split(saveSeparator);
+        this.surfaceLevel = parseInt(save[l++]);
+        this.day = parseFloat(save[l++]);
+        s = save[l++].split(saveSeparator);
         this.worldSpawn = new AVector(parseInt(s[0]), parseInt(s[1]));
         // block data
         this.blockGrid = new Array(worldSize.x);
@@ -135,6 +122,7 @@ class World {
 
     save() {
         let s = worldSize.x + saveSeparator + worldSize.y +"\n"+
+            this.surfaceLevel +"\n"+
             this.day +"\n"+
             this.worldSpawn.x + saveSeparator + this.worldSpawn.y +"\n";
         // block data
@@ -148,56 +136,61 @@ class World {
     }
 
     generate() {
-        worldSize = new AVector(100, 70);
+        worldSize = new AVector(150, 80);
+        this.surfaceLevel = Math.floor(worldSize.y * 0.6);
         this.day = 0;
 
         this.blockGrid = new Array(worldSize.x);
         for (let i = 0; i < worldSize.x; i++) {
             this.blockGrid[i] = new Array(worldSize.y);
-            for (let j = 0; j < Math.floor(worldSize.y * 0.6); j++) {
+            for (let j = 0; j < worldSize.y; j++) {
+                if (j === this.surfaceLevel) {
+                    this.blockGrid[i][j] = new Block(1, 1);
+                } else if (j > this.surfaceLevel) {
+                    let type = Math.floor(Math.random()*1.2+1);
+                    this.blockGrid[i][j] = new Block(type);
+                } else {
+                    this.blockGrid[i][j] = new Block(0);
+                }
+            }
+        }
+        this.worldSpawn = new AVector(40, this.surfaceLevel);
+
+        /* TEST WORLD (size=100,70)
+        this.blockGrid = new Array(worldSize.x);
+        for (let i = 0; i < worldSize.x; i++) {
+            this.blockGrid[i] = new Array(worldSize.y);
+            for (let j = 0; j < this.surfaceLevel; j++) {
                 this.blockGrid[i][j] = new Block(0);
             }
-            for (let j = Math.floor(worldSize.y * 0.6); j < worldSize.y; j++) {
+            for (let j = this.surfaceLevel; j < worldSize.y; j++) {
                 if (i<20||j===worldSize.y-1||(i>=20&&j>i-20)) this.blockGrid[i][j] = new Block(j === worldSize.y-1 ? 2 : 1);
                 else this.blockGrid[i][j] = new Block(0);
             }
         }
         this.worldSpawn = new AVector(40, 41.25);
-
-
-        this.blockGrid[3][Math.floor(worldSize.y * 0.6)] = new Block(0);
-        this.blockGrid[4][Math.floor(worldSize.y * 0.6)] = new Block(0);
-
-
-        this.blockGrid[9][Math.floor(worldSize.y * 0.6)-1] = new Block(1);
-
-        //this.blockGrid[12][Math.floor(worldSize.y * 0.6)-1] = new Block(1);
-        this.blockGrid[12][Math.floor(worldSize.y * 0.6)-2] = new Block(1);
-        this.blockGrid[12][Math.floor(worldSize.y * 0.6)] = new Block(0);
-        this.blockGrid[13][Math.floor(worldSize.y * 0.6)] = new Block(0);
-
-        this.blockGrid[16][Math.floor(worldSize.y * 0.6)-4] = new Block(1);
-
-        for (let i = Math.floor(worldSize.y * 0.6); i < Math.floor(worldSize.y * 0.6) + 7; i++) {
+        this.blockGrid[3][this.surfaceLevel] = new Block(0);
+        this.blockGrid[4][this.surfaceLevel] = new Block(0);
+        this.blockGrid[9][this.surfaceLevel-1] = new Block(1);
+        this.blockGrid[12][this.surfaceLevel-2] = new Block(1);
+        this.blockGrid[12][this.surfaceLevel] = new Block(0);
+        this.blockGrid[13][this.surfaceLevel] = new Block(0);
+        this.blockGrid[16][this.surfaceLevel-4] = new Block(1);
+        for (let i = this.surfaceLevel; i < this.surfaceLevel + 7; i++) {
             this.blockGrid[18][i] = new Block(0);
             this.blockGrid[19][i] = new Block(0);
         }
-        this.blockGrid[20][Math.floor(worldSize.y * 0.6) + 4].id = 0;
-
-        //this.blockGrid[25][Math.floor(worldSize.y * 0.6)] = new Block(0);
-        this.blockGrid[26][Math.floor(worldSize.y * 0.6)] = new Block(0);
-        this.blockGrid[27][Math.floor(worldSize.y * 0.6)] = new Block(0);
-        this.blockGrid[27][Math.floor(worldSize.y * 0.6)-1] = new Block(1);
-
-        this.blockGrid[40][Math.floor(worldSize.y * 0.6)+10] = new Block(0);
-
+        this.blockGrid[20][this.surfaceLevel + 4].id = 0;
+        this.blockGrid[26][this.surfaceLevel] = new Block(0);
+        this.blockGrid[27][this.surfaceLevel] = new Block(0);
+        this.blockGrid[27][this.surfaceLevel-1] = new Block(1);
+        this.blockGrid[40][this.surfaceLevel+10] = new Block(0);
         this.blockGrid[23][worldSize.y-7] = new Block(2);
         this.blockGrid[24][worldSize.y-7] = new Block(2);
         this.blockGrid[27][worldSize.y-4] = new Block(2);
         this.blockGrid[28][worldSize.y-4] = new Block(2);
         this.blockGrid[29][worldSize.y-4] = new Block(2);
-
         this.blockGrid[0][10] = new Block(1);
-        this.blockGrid[5][5] = new Block(1);
+        this.blockGrid[5][5] = new Block(1);*/
     }
 }

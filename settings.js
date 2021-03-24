@@ -3,6 +3,7 @@ class Settings {
         this.heightP = 0.7;  // percentage of dimension height
         this.widthP = 0.8;  // percentage of heightP
         this.titleHeightP = 0.15;  // percentage of heightP
+        this.maxButtonsDisplayed = 15;  // todo add scrolling mechanic
 
         this.size = new AVector(0, 0);
 
@@ -73,7 +74,6 @@ class Settings {
                                 for (const u in keybindings) {
                                     if (keybindings.hasOwnProperty(u)) {
                                         const c = u.replaceAll(/[a-z]/g, "");
-                                        console.log(c)
                                         let s = u.replaceAll(/[A-Z]/g, " ");
                                         for (let i = 0, p = 0; i < c.length; i++) {
                                             p = s.indexOf(" ", p) + 1;
@@ -106,11 +106,12 @@ class Settings {
                         setFrameSize();
                         updateBlockSize();
                         // update player onscreen position for background drawing
-                        if (prevGameState === gameStates.inGame) {
+                        if (gameInstance != null) {
                             gameInstance.setPlayerScreenPos();
                             // update graphics when auto (necessity is checked in loadSprites)
                             if (settings.graphicsChoice === settings.worldBlockSpriteSizes.length) {
-                                gameInstance.world.loadSprites();
+                                gameInstance.world.loadBlockSprites();
+                                loadItemSprites(gameInstance.world);
                             }
                         }
                         this.title = "Current: " + settings.dimension.x + "x" + settings.dimension.y;
@@ -122,8 +123,9 @@ class Settings {
                             break;
                         }
                         settings.graphicsChoice = this.buttonHovered;
-                        if (prevGameState === gameStates.inGame) {
-                            gameInstance.world.loadSprites();
+                        if (gameInstance != null) {
+                            gameInstance.world.loadBlockSprites();
+                            loadItemSprites(gameInstance.world);
                         }
                         this.title = "Current: " + settings.graphicsRange[settings.graphicsChoice].replace(" (recommended)", "");
                         break;
@@ -144,11 +146,12 @@ class Settings {
                         translateZoom();
                         updateBlockSize();
                         // update player onscreen position for background drawing
-                        if (prevGameState === gameStates.inGame) {
+                        if (gameInstance != null) {
                             gameInstance.setPlayerScreenPos();
                             // update graphics when auto (necessity is checked in loadSprites)
                             if (settings.graphicsChoice === settings.worldBlockSpriteSizes.length) {
-                                gameInstance.world.loadSprites();
+                                gameInstance.world.loadBlockSprites();
+                                loadItemSprites(gameInstance.world);
                             }
                         }
                         this.title = "Current: " + Math.round((1 + settings.zoomFactorChoice)*10)/10;

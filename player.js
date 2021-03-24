@@ -2,11 +2,11 @@ class Player {
     constructor(worldRef, save) {
         this.wld = worldRef;
 
+        this.radius = 0.75;  // must be ]0.5;1] (collision is not fail-proof for every size) -> radii over 1 work pretty well, only need to fix x collision
+
         this.gravity = 60;
 
-        // TODO load from save
-
-        this.pos = this.wld.worldSpawn.clone();
+        this.pos = this.wld.worldSpawn.clone().sub(0, this.radius);
         this.vel = new AVector(0, 0);
         this.acc = new AVector(0, this.gravity);
 
@@ -44,10 +44,8 @@ class Player {
         this.inAir = false;
         this.inAirStart = 0;
 
-        // building
-        this.buildingRange = [3, 2, 4];  // top, bottom, LR
-
-        this.radius = 0.75;  // must be ]0.5;1] (collision is not fail-proof for every size) -> radii over 1 work pretty well, only need to fix x collision
+        // building/breaking
+        this.range = [4, 2, 5];  // top, bottom, LR
 
         this.color = "rgb(94,248,245)";
         //this.colorH = 0;
@@ -57,26 +55,40 @@ class Player {
         this.upgradeRules = {
             addMaxVelXSteps: 1,
             addMaxVelXMax: 5,  // max steps
+            addJumpsMax: 3,
             addJumpVelSteps: -1,
             addJumpVelMax: 5,  // max steps
+            addPlaceRangeMax: 5,
         }
-        this.upgrades = {
+        this.upgrades = {  // todo apply
             addMaxVelX: 0,  // steps
             autoJump: false,
             addJumpsPossible: 0,
             addJumpVel: 0,  // steps
+            addPlaceRange: 0,
         }
 
+        this.hotbarSelection = 0;
         this.inventory = new Array(10);  // columns
         for (let i = 0; i < this.inventory.length; i++) {
             this.inventory[i] = new Array(5);  // rows (row 0 is hotbar)
-            for (let j = 0; j < this.inventory[i].length; j++) {
-                this.inventory[i][j] = new Item();
-            }
         }
 
         if (save != null) {
             this.load(save);
+        } else {
+            // zero out inventory
+            for (let i = 0; i < this.inventory.length; i++) {
+                for (let j = 0; j < this.inventory[i].length; j++) {
+                    this.inventory[i][j] = new Item(0);
+                }
+            }
+            // generate player equipment
+            this.inventory[0][0] = new Item(BLOCKS_NUMBER+1);
+            this.inventory[1][0] = new Item(1);
+            this.inventory[2][0] = new Item(2);
+            this.inventory[3][0] = new Item(3);
+            this.inventory[4][0] = new Item(4);
         }
     }
 
@@ -296,14 +308,33 @@ class Player {
 
 
     load(save) {
-        this.upgrades.addMaxVelX = parseInt(save[0]);
-        this.upgrades.autoJump = (save[1] === "true");
-        this.upgrades.addJumpsPossible = parseInt(save[2]);
-        this.upgrades.addJumpVel = parseInt(save[3]);
+        let l = 0;
+        let s;
+        // inventory
+        for (let i = 0; i < this.inventory.length; i++) {
+            s = save[l++].split(saveSeparator);
+            for (let j = 0; j < this.inventory[i].length; j++) {
+                this.inventory[i][j] = new Item(parseInt(s[j]));
+            }
+        }
+        // upgrades
+        this.upgrades.addMaxVelX = parseInt(save[l++]);
+        this.upgrades.autoJump = (save[l++] === "true");
+        this.upgrades.addJumpsPossible = parseInt(save[l++]);
+        this.upgrades.addJumpVel = parseInt(save[l++]);
+        this.upgrades.addPlaceRange = parseInt(save[l++]);
     }
 
     save() {
         let s = playerSaveSeparator +"\n";
+        // inventory
+        for (let i = 0; i < this.inventory.length; i++) {
+            for (let j = 0; j < this.inventory[i].length; j++) {
+                s += this.inventory[i][j].id + saveSeparator;
+            }
+            s += "\n";
+        }
+        // upgrades
         for (const u in this.upgrades) {
             if (this.upgrades.hasOwnProperty(u))
                 s += this.upgrades[u] +"\n";

@@ -39,7 +39,7 @@ AVector.prototype = {
     length: function() {
         return Math.sqrt(this.x * this.x + this.y * this.y);
     },
-    add: function(v, a="sub_y") {
+    add: function(v, a="add_y") {
         if (v instanceof AVector) {
             this.x += v.x;
             this.y += v.y;

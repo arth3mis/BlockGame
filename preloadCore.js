@@ -1,10 +1,12 @@
-const GAME_VERSION = 5;
+const GAME_VERSION = 6;
 const GAME_NAME = "BlockGame";
 
 const canvas = document.getElementById("canvas");
 const cx = canvas.getContext("2d");
 const resPath = "res/", resFileType = ".png";
-const saveFileType = ".block", saveSeparator = ";", playerSaveSeparator = "$$$";
+const saveFileType = ".block", playerSaveSeparator = "$$$", saveSeparator = ";", saveSeparator2 = "_";  // todo save block.useSprite
+
+const isOsMac = navigator.platform.toLowerCase().includes("mac");
 
 // game settings and user options
 const timeUnit = 1000;  // 1000 -> speed values etc. are "per second"
@@ -22,24 +24,24 @@ const settings = {
     dimensionChoice: 2,
     fullscreen: false,
 
-    blocksInHeightRange: [17, 54],
-    blocksInHeight: 54,
+    blocksInHeightRange: [17, 54], // todo dev; maybe 27 as max
+    blocksInHeight: 0,
     zoomFactorChoice: 0.8,  // 0 - furthest out; 1 - furthest in (least blocksInHeight)
     worldBlockSpriteSizes: [64, 32, 16],  // used to measure whether graphics are auto
     graphicsRange: ["High", "Mid", "Low", "Auto - higher (recommended)", "Auto - lower"],  // [0:3] equal file names (not case-sensitive)
     graphicsChoice: 3,
 
-    displayFps: true,
+    displayFps: false,
     dropZoneWidth: 100,
 }
 let noBrowserFullscreenExit = false;
 
-function sc(a=Number.NaN, /*round=false*/) {
+function sc(a=Number.NaN, manualScale=1) {
     if (!Number.isNaN(a)) {
         //if (round) {
         //    return Math.round(a * settings.dimScales[settings.dimensionChoice][0] / settings.dimScales[settings.dimensionChoice][1]);
         //}
-        return a * settings.dimScales[settings.dimensionChoice][0] / settings.dimScales[settings.dimensionChoice][1];
+        return a * manualScale * settings.dimScales[settings.dimensionChoice][0] / settings.dimScales[settings.dimensionChoice][1];
     }
     return settings.dimScales[settings.dimensionChoice][0] / settings.dimScales[settings.dimensionChoice][1];
 }

@@ -1,10 +1,10 @@
-const GAME_VERSION = 6;
+const GAME_VERSION = 7;
 const GAME_NAME = "BlockGame";
 
 const canvas = document.getElementById("canvas");
 const cx = canvas.getContext("2d");
 const resPath = "res/", resFileType = ".png";
-const saveFileType = ".block", playerSaveSeparator = "$$$", saveSeparator = ";", saveSeparator2 = "_";  // todo save block.useSprite
+const saveFileType = ".block", playerSaveSeparator = "$$$", saveSeparator = ";", saveSeparator2 = "_";
 
 const isOsMac = navigator.platform.toLowerCase().includes("mac");
 
@@ -24,9 +24,10 @@ const settings = {
     dimensionChoice: 2,
     fullscreen: false,
 
-    blocksInHeightRange: [17, 54], // todo dev; maybe 27 as max
+    blocksInHeightRange: [17, 30],
     blocksInHeight: 0,
     zoomFactorChoice: 0.8,  // 0 - furthest out; 1 - furthest in (least blocksInHeight)
+    uiScaleChoice: 1.6,
     worldBlockSpriteSizes: [64, 32, 16],  // used to measure whether graphics are auto
     graphicsRange: ["High", "Mid", "Low", "Auto - higher (recommended)", "Auto - lower"],  // [0:3] equal file names (not case-sensitive)
     graphicsChoice: 3,

@@ -24,6 +24,7 @@ class Settings {
             "Graphics",
             "Keybindings",
             "Zoom",
+            // TODO ui scale
             // TODO display fps
         ];
         this.stdButtonTexts = [];

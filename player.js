@@ -45,7 +45,7 @@ class Player {
         this.inAirStart = 0;
 
         // building/breaking
-        this.range = [4, 2, 5];  // top, bottom, LR
+        this.range = [4, 3, 5];  // top, bottom, LR
 
         this.color = "rgb(94,248,245)";
         //this.colorH = 0;

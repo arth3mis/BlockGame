@@ -15,7 +15,7 @@ let lightBaseValue = 0.25;
 const lightThreshold = 0.06;  // TODO balance
 const lightRoundToZero = 1e-6;
 
-const saveFileLowestSupportedVersion = 6;
+const saveFileLowestSupportedVersion = 7;
 function checkSaveFile(versionLine) {
     let v = parseInt(versionLine);
     return v >= saveFileLowestSupportedVersion;
@@ -115,7 +115,7 @@ class World {
             this.blockGrid[x] = new Array(worldSize.y);
             s = save[preBlockDataLines + x].split(saveSeparator);
             for (let y = 0; y < worldSize.y; y++) {
-                this.blockGrid[x][y] = new Block(parseInt(s[y]));
+                this.blockGrid[x][y] = new Block(parseInt(s[y].split(saveSeparator2)[0]), parseInt(s[y].split(saveSeparator2)[1]));
             }
         }
     }
@@ -128,7 +128,7 @@ class World {
         // block data
         for (let x = 0; x < worldSize.x; x++) {
             for (let y = 0; y < worldSize.y; y++) {
-                s += this.blockGrid[x][y].id + saveSeparator;
+                s += this.blockGrid[x][y].id + saveSeparator2 + this.blockGrid[x][y].useSprite + saveSeparator;
             }
             s += "\n";
         }

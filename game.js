@@ -51,7 +51,6 @@ class Game {
             yOffset: 20,
             space: 7,
             size: 50,
-            scale: 1,
             itemScale: 0.75,
             blockScale: 0.4,
             bgColor: "rgba(99,83,188,0.8)",
@@ -258,43 +257,43 @@ class Game {
             for (let j = 0; j < (inventory.show ? this.player.inventory[i].length : 1); j++) {
                 cx.fillStyle = this.drawInventory.bgColor;
                 cx.fillRect(
-                    sc(this.drawInventory.xOffset + i * (this.drawInventory.size + this.drawInventory.space), this.drawInventory.scale),
-                    sc(this.drawInventory.yOffset + j * (this.drawInventory.size + this.drawInventory.space), this.drawInventory.scale),
-                    sc(this.drawInventory.size, this.drawInventory.scale), sc(this.drawInventory.size, this.drawInventory.scale));
+                    sc(this.drawInventory.xOffset + i * (this.drawInventory.size + this.drawInventory.space), settings.uiScaleChoice),
+                    sc(this.drawInventory.yOffset + j * (this.drawInventory.size + this.drawInventory.space), settings.uiScaleChoice),
+                    sc(this.drawInventory.size, settings.uiScaleChoice), sc(this.drawInventory.size, settings.uiScaleChoice));
                 if (j === 0) {
                     if (this.player.hotbarSelection === i) {
                         cx.lineWidth = this.drawInventory.hotbarSelectStroke;
                         cx.strokeStyle = this.drawInventory.hotbarSelectColor;
                         cx.strokeRect(
-                            sc(this.drawInventory.xOffset + i * (this.drawInventory.size + this.drawInventory.space), this.drawInventory.scale),
-                            sc(this.drawInventory.yOffset + j * (this.drawInventory.size + this.drawInventory.space), this.drawInventory.scale),
-                            sc(this.drawInventory.size, this.drawInventory.scale), sc(this.drawInventory.size, this.drawInventory.scale));
+                            sc(this.drawInventory.xOffset + i * (this.drawInventory.size + this.drawInventory.space), settings.uiScaleChoice),
+                            sc(this.drawInventory.yOffset + j * (this.drawInventory.size + this.drawInventory.space), settings.uiScaleChoice),
+                            sc(this.drawInventory.size, settings.uiScaleChoice), sc(this.drawInventory.size, settings.uiScaleChoice));
                     }
-                    cx.font = sc(this.drawInventory.hotbarNumbersFontSize, this.drawInventory.scale) + "px Arial";
+                    cx.font = sc(this.drawInventory.hotbarNumbersFontSize, settings.uiScaleChoice) + "px Arial";
                     cx.fillStyle = "black";
                     cx.fillText(((i===9?-1:i)+1)+"",
-                        sc(4+ this.drawInventory.xOffset + i * (this.drawInventory.size + this.drawInventory.space), this.drawInventory.scale),
-                        sc(3+ this.drawInventory.yOffset + j * (this.drawInventory.size + this.drawInventory.space), this.drawInventory.scale));
+                        sc(4+ this.drawInventory.xOffset + i * (this.drawInventory.size + this.drawInventory.space), settings.uiScaleChoice),
+                        sc(3+ this.drawInventory.yOffset + j * (this.drawInventory.size + this.drawInventory.space), settings.uiScaleChoice));
                 }
                 // items in inventory
                 if (this.player.inventory[i][j].id !== 0) {
                     if (this.player.inventory[i][j].id <= BLOCKS_NUMBER) {  // item is block
                         cx.drawImage(this.world.blockSprites[this.player.inventory[i][j].id - 1][0],
-                            sc(this.drawInventory.xOffset + i * (this.drawInventory.size + this.drawInventory.space), this.drawInventory.scale) + sc((1 - this.drawInventory.blockScale) * this.drawInventory.size/2),
-                            sc(this.drawInventory.yOffset + j * (this.drawInventory.size + this.drawInventory.space), this.drawInventory.scale) + sc((1 - this.drawInventory.blockScale) * this.drawInventory.size/2),
-                            sc(this.drawInventory.size, this.drawInventory.scale * this.drawInventory.blockScale), sc(this.drawInventory.size, this.drawInventory.scale * this.drawInventory.blockScale));
+                            sc(this.drawInventory.xOffset + i * (this.drawInventory.size + this.drawInventory.space), settings.uiScaleChoice) + sc((1 - this.drawInventory.blockScale) * this.drawInventory.size/2, settings.uiScaleChoice),
+                            sc(this.drawInventory.yOffset + j * (this.drawInventory.size + this.drawInventory.space), settings.uiScaleChoice) + sc((1 - this.drawInventory.blockScale) * this.drawInventory.size/2, settings.uiScaleChoice),
+                            sc(this.drawInventory.size, settings.uiScaleChoice * this.drawInventory.blockScale), sc(this.drawInventory.size, settings.uiScaleChoice * this.drawInventory.blockScale));
                     } else {  // item is tool etc.
                         cx.translate(
-                            sc(this.drawInventory.xOffset + i * (this.drawInventory.size + this.drawInventory.space), this.drawInventory.scale) + sc((1 - this.drawInventory.itemScale) * this.drawInventory.size/2),
-                            sc(this.drawInventory.yOffset + j * (this.drawInventory.size + this.drawInventory.space), this.drawInventory.scale) + sc((1 + this.drawInventory.itemScale) * this.drawInventory.size/2));
+                            sc(this.drawInventory.xOffset + i * (this.drawInventory.size + this.drawInventory.space), settings.uiScaleChoice) + sc((1 - this.drawInventory.itemScale) * this.drawInventory.size/2, settings.uiScaleChoice),
+                            sc(this.drawInventory.yOffset + j * (this.drawInventory.size + this.drawInventory.space), settings.uiScaleChoice) + sc((1 + this.drawInventory.itemScale) * this.drawInventory.size/2, settings.uiScaleChoice));
                         cx.rotate(-Math.PI/2);
                         cx.drawImage(itemSprites[this.player.inventory[i][j].id - BLOCKS_NUMBER - 1],
-                            0, 0, sc(this.drawInventory.size, this.drawInventory.scale * this.drawInventory.itemScale), sc(this.drawInventory.size, this.drawInventory.scale * this.drawInventory.itemScale));
+                            0, 0, sc(this.drawInventory.size, settings.uiScaleChoice * this.drawInventory.itemScale), sc(this.drawInventory.size, settings.uiScaleChoice * this.drawInventory.itemScale));
                         // translate back
                         cx.rotate(Math.PI/2);
                         cx.translate(
-                            -(sc(this.drawInventory.xOffset + i * (this.drawInventory.size + this.drawInventory.space), this.drawInventory.scale) + sc((1 - this.drawInventory.itemScale) * this.drawInventory.size/2)),
-                            -(sc(this.drawInventory.yOffset + j * (this.drawInventory.size + this.drawInventory.space), this.drawInventory.scale) + sc((1 + this.drawInventory.itemScale) * this.drawInventory.size/2)));
+                            -(sc(this.drawInventory.xOffset + i * (this.drawInventory.size + this.drawInventory.space), settings.uiScaleChoice) + sc((1 - this.drawInventory.itemScale) * this.drawInventory.size/2, settings.uiScaleChoice)),
+                            -(sc(this.drawInventory.yOffset + j * (this.drawInventory.size + this.drawInventory.space), settings.uiScaleChoice) + sc((1 + this.drawInventory.itemScale) * this.drawInventory.size/2, settings.uiScaleChoice)));
                     }
                 }
             }

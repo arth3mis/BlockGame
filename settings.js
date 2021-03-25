@@ -88,7 +88,7 @@ class Settings {
                                 break;
                             // zoom
                             case 3:
-                                this.title = "Current: " + Math.round((1 + settings.zoomFactorChoice)*10)/10;
+                                this.title = "Current: " + Math.round((1 + settings.zoomFactorChoice)*10)/10;  // todo plus&minus buttons: check x half mouse is in, stay in main page and inc/dec zoom with certain speed
                                 this.buttonTexts = [];
                                 for (let i = 1; i <= 2; i = Math.round((i + 0.1)*10)/10) {
                                     this.buttonTexts.push(i);

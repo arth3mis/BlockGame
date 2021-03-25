@@ -238,7 +238,7 @@ class Game {
         if (this.swingTool) {
             cx.translate(this.playerScreenPos.x + (this.swingLeft ? -1 : 1) * this.player.radius*blockSize/3, this.playerScreenPos.y);
             cx.rotate(this.swingLeft ? Math.PI - this.swingAngle[0] : this.swingAngle[0]);
-            cx.drawImage(itemSprites[this.player.inventory[this.player.hotbarSelection][0].id - BLOCKS_NUMBER - 1], 0, 0, sc(this.useItemDrawSize, blockSize), sc(this.useItemDrawSize, blockSize));
+            cx.drawImage(itemSprites[this.player.inventory[this.player.hotbarSelection][0].id - BLOCKS_NUMBER - 1], 0, 0, this.useItemDrawSize * blockSize, this.useItemDrawSize * blockSize);
             // translate back
             cx.rotate(-(this.swingLeft ? Math.PI - this.swingAngle[0] : this.swingAngle[0]));
             cx.translate(-(this.playerScreenPos.x + (this.swingLeft ? -1 : 1) * this.player.radius*blockSize/3), -this.playerScreenPos.y);

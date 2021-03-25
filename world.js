@@ -12,7 +12,7 @@ const worldTime = {
 }
 
 let lightBaseValue = 0.25;
-const lightThreshold = 0.06;  // TODO balance
+const lightThreshold = 0.06;
 const lightRoundToZero = 1e-6;
 
 const saveFileLowestSupportedVersion = 7;

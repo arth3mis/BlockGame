@@ -46,6 +46,10 @@ class Game {
         this.playerScreenPos = new AVector(canvas.width/2, canvas.height/2);
         loadItemSprites(this.world, true);
 
+        this.sun = {  // todo sun on screen top, shift up/down in certain range by player y position in world, move to right (and on (-x^2)?)
+            pos: new AVector(0, 0),
+        }
+
         this.drawInventory = {
             xOffset: 30,
             yOffset: 20,

@@ -29,7 +29,7 @@ class Player {
         // settings
         this.jumpVel = -12;  // jump velocity
         this.jumpTimeout = 0.3 * timeUnit;  // jump duration
-        this.inAirJumpDelay = 0.07 * timeUnit;  // can still jump after this time in air
+        this.inAirJumpDelay = 0.15 * timeUnit;  // can still jump after this time in air
         this.autoJump = false;
         this.jumpsPossible = 1;
         this.followUpJumpsStrengthFactor = 0.9;
@@ -128,7 +128,10 @@ class Player {
                     this.jumpsTriggered++;
                     this.jumpsDone = 1;
                 }
-                this.startJump();
+                // start jump if still possible
+                if (this.jumpsDone < this.jumpsPossible) {
+                    this.startJump();
+                }
             }
             // jump while holding jump button
             if (this.jumping && gameTime - this.jumpTime < this.jumpTimeout * (this.jumpsDone > 1 ? this.followUpJumpsStrengthFactor : 1)) {

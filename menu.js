@@ -83,6 +83,13 @@ class Menu {
             cx.fillText("\""+gameInstance.saveName+"\"", sc(580), sc(750));
         }
 
+        // game version
+        cx.textAlign = "left";
+        cx.textBaseline = "bottom";
+        cx.font = sc(30) + "px Arial";
+        cx.fillStyle = "rgb(58,164,76)";
+        cx.fillText("v"+GAME_VERSION, sc(10), canvas.height - sc(10));
+
         // world gen info todo activate and test when loading time increases
         if (this.generatingWorld) {
             //cx.textAlign = "center";

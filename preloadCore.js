@@ -1,4 +1,4 @@
-const GAME_VERSION = 9;
+const GAME_VERSION = 10;
 const GAME_NAME = "BlockGame";
 
 const canvas = document.getElementById("canvas");
@@ -32,7 +32,7 @@ const settings = {
     graphicsRange: ["High", "Mid", "Low", "Auto - higher (recommended)", "Auto - lower"],  // [0:3] equal file names (not case-sensitive)
     graphicsChoice: 3,
 
-    displayFps: false,
+    displayFps: true,
     dropZoneWidth: 100,
 }
 let noBrowserFullscreenExit = false;

@@ -54,14 +54,15 @@ function animate(timestamp) {
             checks = 0;
         }
         // todo dev draw info with fps
-        cx.textAlign = "left";
-        cx.textBaseline = "bottom";
-        cx.font = sc(40) + "px Arial";
+        cx.textAlign = "right";
+        cx.textBaseline = "top";
+        cx.font = sc(20) + "px Arial";
         cx.fillStyle = "white";
-        cx.fillText(drawFPS + " fps; "+Math.floor(gameTime/100)//+"; "+Math.round(blockSize*100)/100
-            +"; "+(gameInstance != null ? Math.round(gameInstance.world.day*100)/100 : "-")
+        let s = drawFPS + "FPS";
+            //+"; "+Math.floor(gameTime/100) +"; "+ Math.round(blockSize*100)/100
+            //+"; "+(gameInstance != null ? Math.round(gameInstance.world.day*100)/100 : "-")
             //+"; "+(gameInstance != null ? gameInstance.player.pos.y : "-")
-            , sc(20), canvas.height - sc(20));
+        cx.fillText(s, canvas.width - sc(5), sc(7));
     }
 
     // -----------------------------------------------------------------------------------------------------------------

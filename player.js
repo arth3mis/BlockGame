@@ -65,7 +65,7 @@ class Player {
             autoJump: false,
             addJumpsPossible: 0,
             addJumpVel: 0,  // steps
-            addPlaceRange: 0,
+            addPlaceRange: 10,
         }
 
         this.hotbarSelection = 0;

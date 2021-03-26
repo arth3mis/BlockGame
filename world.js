@@ -154,7 +154,44 @@ class World {
                 }
             }
         }
-        this.worldSpawn = new AVector(40, this.surfaceLevel);
+
+        // TEST FOR HEIGHTMAP
+        this.random = new Array(worldSize.x); // Random Numbers
+        this.heightMap = new Array(worldSize.x); // Height of Terrain
+        this.seed = "hello" // Seed
+        this.smoothness = 7; // Smoothes with neighboring elements of Height Map
+
+        // Set Seed
+        Math.seedrandom("hi");
+
+        // Random HeightMap
+        for (let i = 0; i < worldSize.x; i++) {
+            this.random[i] = 10 * Math.random();
+            // this.blockGrid[i][Math.floor(10*Math.random()) + this.surfaceLevel-10] = new Block(3);
+        }
+
+        // Smooth HeightMap
+        for (let i = this.smoothness; i < worldSize.x - this.smoothness; i++) {
+            this.heightMap[i] = this.random[i];
+
+            for (let j = 0; j < this.smoothness; j++) {
+                this.heightMap[i] += this.random[i - j] + this.random[i + j];
+            }
+
+            this.heightMap[i] = Math.floor(this.heightMap[i] / (1 + 2 * this.smoothness));
+            console.log(this.heightMap[i]);
+        }
+
+        for (let i = 0; i < worldSize.x; i++) {
+            this.blockGrid[i][this.heightMap[i] + this.surfaceLevel-10] = new Block(3);
+        }
+
+
+
+
+
+
+        this.worldSpawn = new AVector(40, this.surfaceLevel - 1);
 
         /* TEST WORLD (size=100,70)
         this.blockGrid = new Array(worldSize.x);

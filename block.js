@@ -3,7 +3,7 @@ class Particle {
         this.width = Math.random() * 0.1 + 0.02;
         this.height = Math.random() * 0.1 + 0.02;
         this.color = color;
-
+        
         this.pos = new AVector(blockX + Math.random(), blockY);
         this.vel = new AVector(Math.random() * 2 - 1, -Math.random() * 2);
         this.accY = 40;

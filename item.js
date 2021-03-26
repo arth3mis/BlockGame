@@ -21,7 +21,7 @@ class Item {
         this.pickaxe = false;
         this.pickaxePowerBase = 1;
         this.pickaxePowerAdd = 0;
-        this.toolRangeAdd = 0;
+        this.toolRangeAdd = 10;
         this.ITEMS();
     }
 

@@ -21,7 +21,7 @@ const settings = {
     dimension: new AVector(0,0),
     dimensions: [[3840,2160], [2560,1440], [1920,1080], [1280,720], [960,540], [640,360]],  // 16:9 only (or update text scaling)
     dimScales:  [      [2,1],       [4,3],       [1,1],      [2,3],     [1,2],     [1,3]],
-    dimensionChoice: 2,
+    dimensionChoice: 3,
     fullscreen: false,
 
     blocksInHeightRange: [17, 30],

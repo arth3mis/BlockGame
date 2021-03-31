@@ -136,17 +136,47 @@ class World {
     }
 
     generate() {
-        worldSize = new AVector(150, 80);
+        worldSize = new AVector(500, 200);
         this.surfaceLevel = Math.floor(worldSize.y * 0.6);
         this.day = 0;
+
+        // TEST FOR HEIGHTMAP
+        this.seed = 2; // Seed
+        this.smoothness = 50; // Smoothes with neighboring elements of Height Map
+        this.heightMap = new Array(worldSize.x);
+
+        // Set Seed
+        noise.seed(this.seed);
+
+
+        for (let i = 0; i < worldSize.x; i++) {
+            this.heightMap[i] = this.surfaceLevel;
+
+            // Big elevations
+            this.heightMap[i] += noise.simplex2(i/this.smoothness/2, 0) * 10;
+
+            // Medium elevations
+            this.heightMap[i] += noise.simplex2(i/this.smoothness, 1) * 5;
+
+            // Small elevations
+            this.heightMap[i] += noise.simplex2(i/this.smoothness * 2, 1) * 5;
+
+            // This is an integer
+            this.heightMap[i] = Math.floor(this.heightMap[i]);
+        }
+
+        for (let i = 0; i < worldSize.x; i++) {
+            //this.blockGrid[i][this.heightMap[i]] = new Block(3);
+        }
+
 
         this.blockGrid = new Array(worldSize.x);
         for (let i = 0; i < worldSize.x; i++) {
             this.blockGrid[i] = new Array(worldSize.y);
             for (let j = 0; j < worldSize.y; j++) {
-                if (j === this.surfaceLevel) {
+                if (j === this.heightMap[i]) {
                     this.blockGrid[i][j] = new Block(1, 1);
-                } else if (j > this.surfaceLevel) {
+                } else if (j > this.heightMap[i]) {
                     let type = Math.floor(Math.random()*1.2+1);
                     this.blockGrid[i][j] = new Block(type);
                 } else {
@@ -155,43 +185,11 @@ class World {
             }
         }
 
-        // TEST FOR HEIGHTMAP
-        this.random = new Array(worldSize.x); // Random Numbers
-        this.heightMap = new Array(worldSize.x); // Height of Terrain
-        this.seed = "hello" // Seed
-        this.smoothness = 7; // Smoothes with neighboring elements of Height Map
-
-        // Set Seed
-        Math.seedrandom("hi");
-
-        // Random HeightMap
-        for (let i = 0; i < worldSize.x; i++) {
-            this.random[i] = 10 * Math.random();
-            // this.blockGrid[i][Math.floor(10*Math.random()) + this.surfaceLevel-10] = new Block(3);
-        }
-
-        // Smooth HeightMap
-        for (let i = this.smoothness; i < worldSize.x - this.smoothness; i++) {
-            this.heightMap[i] = this.random[i];
-
-            for (let j = 0; j < this.smoothness; j++) {
-                this.heightMap[i] += this.random[i - j] + this.random[i + j];
-            }
-
-            this.heightMap[i] = Math.floor(this.heightMap[i] / (1 + 2 * this.smoothness));
-            console.log(this.heightMap[i]);
-        }
-
-        for (let i = 0; i < worldSize.x; i++) {
-            this.blockGrid[i][this.heightMap[i] + this.surfaceLevel-10] = new Block(3);
-        }
 
 
 
 
-
-
-        this.worldSpawn = new AVector(40, this.surfaceLevel - 1);
+        this.worldSpawn = new AVector(40, this.surfaceLevel - 20);
 
         /* TEST WORLD (size=100,70)
         this.blockGrid = new Array(worldSize.x);

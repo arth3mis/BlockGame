@@ -144,6 +144,7 @@ class World {
         this.seed = 2; // Seed
         this.smoothness = 50; // Smoothes with neighboring elements of Height Map
         this.heightMap = new Array(worldSize.x);
+        this.stoneLevel = new Array(worldSize.x);
 
         // Set Seed
         noise.seed(this.seed);
@@ -159,14 +160,12 @@ class World {
             this.heightMap[i] += noise.simplex2(i/this.smoothness, 1) * 5;
 
             // Small elevations
-            this.heightMap[i] += noise.simplex2(i/this.smoothness * 2, 1) * 5;
+            this.heightMap[i] += noise.simplex2(i/this.smoothness * 2, 2) * 5;
 
             // This is an integer
             this.heightMap[i] = Math.floor(this.heightMap[i]);
-        }
 
-        for (let i = 0; i < worldSize.x; i++) {
-            //this.blockGrid[i][this.heightMap[i]] = new Block(3);
+            this.stoneLevel[i] = this.heightMap[i] + 8 + Math.floor(noise.simplex2(i / 30, 3) * 5) + Math.floor(noise.simplex2(i, 4)*2);
         }
 
 
@@ -177,7 +176,12 @@ class World {
                 if (j === this.heightMap[i]) {
                     this.blockGrid[i][j] = new Block(1, 1);
                 } else if (j > this.heightMap[i]) {
-                    let type = Math.floor(Math.random()*1.2+1);
+                    let type;
+                    if (j > this.stoneLevel[i]) {
+                        type = 2;
+                    } else {
+                        type = 1;
+                    }
                     this.blockGrid[i][j] = new Block(type);
                 } else {
                     this.blockGrid[i][j] = new Block(0);

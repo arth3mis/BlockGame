@@ -30,7 +30,7 @@ class Player {
         this.jumpVel = -12;  // jump velocity
         this.jumpTimeout = 0.3 * timeUnit;  // jump duration
         this.inAirJumpDelay = 0.15 * timeUnit;  // can still jump after this time in air
-        this.autoJump = false;
+        this.autoJump = true;
         this.jumpsPossible = 1;
         this.followUpJumpsStrengthFactor = 0.9;
 
@@ -80,15 +80,15 @@ class Player {
             // zero out inventory
             for (let i = 0; i < this.inventory.length; i++) {
                 for (let j = 0; j < this.inventory[i].length; j++) {
-                    this.inventory[i][j] = new Item(0);
+                    this.inventory[i][j] = new Item(INVENTORY_EMPTY);
                 }
             }
             // generate player equipment
-            this.inventory[0][0] = new Item(BLOCKS_NUMBER+1);
-            this.inventory[1][0] = new Item(1);
-            this.inventory[2][0] = new Item(2);
-            this.inventory[3][0] = new Item(3);
-            this.inventory[4][0] = new Item(4);
+            this.inventory[0][0] = new Item("pickaxe");
+            this.inventory[1][0] = new Item("dirt");
+            this.inventory[2][0] = new Item("stone");
+            this.inventory[3][0] = new Item("testBlock1");
+            this.inventory[4][0] = new Item("testBlock2");
         }
     }
 
@@ -116,7 +116,7 @@ class Player {
         this.edgePush = 0;
 
         // jumping
-        if (keyboard.jump && (this.autoJump || !this.jumpTriggerNeeded)) {
+        if (keyboard.jump && ((this.autoJump || this.upgrades.autoJump) || !this.jumpTriggerNeeded)) {
             // start jump from ground
             if (!this.firstJumped && (!this.inAir || gameTime - this.inAirStart < this.inAirJumpDelay)) {
                 this.startFirstJump();
@@ -198,7 +198,7 @@ class Player {
             // go from bottom to top to put player as high as possible (esp. if they skipped blocks)
             for (let yBlock = Math.max(midXBlocks[1], midXBlocks[0]); yBlock >= Math.min(midXBlocks[0], midXBlocks[1]); yBlock--) {
                 if (0 <= yBlock && yBlock < worldSize.y) {
-                    if (this.wld.blockGrid[Math.floor(this.pos.x)][yBlock].id !== 0) {
+                    if (this.wld.blockGrid[Math.floor(this.pos.x)][yBlock].id !== "air") {
                         if (yBlock - this.pos.y <= this.radius) {
                             bStop = yBlock - this.radius;
                         }
@@ -208,7 +208,7 @@ class Player {
             // block directly above player
             midXBlocks = [Math.ceil(prePos.y - this.radius), Math.floor(this.pos.y - this.radius)];
             for (let yBlock = Math.min(midXBlocks[1], midXBlocks[0]); yBlock <= Math.max(midXBlocks[0], midXBlocks[1]); yBlock++) {
-                if (0 <= yBlock && yBlock < worldSize.y && this.wld.blockGrid[Math.floor(this.pos.x)][yBlock].id !== 0) {
+                if (0 <= yBlock && yBlock < worldSize.y && this.wld.blockGrid[Math.floor(this.pos.x)][yBlock].id !== "air") {
                     if (this.pos.y - yBlock - 1 <= this.radius) {
                         tStop = yBlock + 1 + this.radius;
                     }
@@ -221,7 +221,7 @@ class Player {
                 if (0 <= xBlock && xBlock < worldSize.x) {
                     for (let yBlock = yRange[1]; yBlock >= yRange[0]; yBlock--) {
                         if (0 <= yBlock && yBlock < worldSize.y) {
-                            if (this.wld.blockGrid[xBlock][yBlock].id !== 0) {
+                            if (this.wld.blockGrid[xBlock][yBlock].id !== "air") {
                                 let xDiff = this.pos.x - xBlock - (xBlock < this.pos.x ? 1 : 0);
                                 let yDiff = Math.sqrt(this.radius * this.radius - xDiff * xDiff);
                                 let top = prePos.y > this.pos.y;
@@ -252,26 +252,26 @@ class Player {
 
     collisionX(x, y, toRight) {
         if (y <= 0) {
-            return this.wld.blockGrid[x][0].id !== 0 || this.wld.blockGrid[x][1].id !== 0;
+            return this.wld.blockGrid[x][0].id !== "air" || this.wld.blockGrid[x][1].id !== "air";
         }
         if (0 < y && y < worldSize.y - 1) {
-            if (this.wld.blockGrid[x][y].id !== 0) {    // O☐   case a
+            if (this.wld.blockGrid[x][y].id !== "air") {    // O☐   case a
                 //console.log("a")
                 return true;
-            } else if (this.wld.blockGrid[x][y-1].id !== 0) {
-                if (this.wld.blockGrid[x + (toRight ? -1 : 1)][y+1].id !== 0) {     //  ☐ y-1   case b1
+            } else if (this.wld.blockGrid[x][y-1].id !== "air") {
+                if (this.wld.blockGrid[x + (toRight ? -1 : 1)][y+1].id !== "air") {     //  ☐ y-1   case b1
                     //console.log("b1")                                             // O
                     return true;                                                    // ☐ x-1 (if toRight)
-                } else if (this.wld.blockGrid[x][y+1].id !== 0) {   //  ☐ y-1   case b2
+                } else if (this.wld.blockGrid[x][y+1].id !== "air") {   //  ☐ y-1   case b2
                     //console.log("b2")                             // O
                     return true;                                    //  ☐ y+1
                 }
-            } else if (this.wld.blockGrid[x][y+1].id !== 0 && this.wld.blockGrid[x + (toRight ? -1 : 1)][y-1].id !== 0) {   // case b1 with reverse y
+            } else if (this.wld.blockGrid[x][y+1].id !== "air" && this.wld.blockGrid[x + (toRight ? -1 : 1)][y-1].id !== "air") {   // case b1 with reverse y
                 return true;
             }
         }
         if (y >= worldSize.y - 1) {
-            return this.wld.blockGrid[x][worldSize.y-1].id !== 0 || this.wld.blockGrid[x][worldSize.y-2].id !== 0;
+            return this.wld.blockGrid[x][worldSize.y-1].id !== "air" || this.wld.blockGrid[x][worldSize.y-2].id !== "air";
         }
     }
 
@@ -317,7 +317,7 @@ class Player {
         for (let i = 0; i < this.inventory.length; i++) {
             s = save[l++].split(saveSeparator);
             for (let j = 0; j < this.inventory[i].length; j++) {
-                this.inventory[i][j] = new Item(parseInt(s[j]));
+                this.inventory[i][j] = new Item(s[j]);
             }
         }
         // upgrades

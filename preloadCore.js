@@ -1,4 +1,4 @@
-const GAME_VERSION = 12;
+const GAME_VERSION = 13;
 const GAME_NAME = "BlockGame";
 
 const canvas = document.getElementById("canvas");

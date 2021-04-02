@@ -1,28 +1,10 @@
-const blockFillScale = 0.01;  // percentage of blockSize (in each direction)
+const saveFileLowestSupportedVersion = 13;
+function checkSaveFile(versionLine) {
+    let v = parseInt(versionLine);
+    return v >= saveFileLowestSupportedVersion;
+}
 
-function getChosenGraphicsFile() {  // todo save as variable and update on graphics/blockSize/res change
-    let graphicsFile = "error";
-    if (settings.graphicsChoice < settings.worldBlockSpriteSizes.length) {
-        graphicsFile = settings.graphicsRange[settings.graphicsChoice].toLowerCase();
-    } else if (settings.graphicsChoice === settings.worldBlockSpriteSizes.length) {
-        graphicsFile = settings.graphicsRange[findClosestSpriteSize(true)].toLowerCase();
-    } else if (settings.graphicsChoice === settings.worldBlockSpriteSizes.length + 1) {
-        graphicsFile = settings.graphicsRange[findClosestSpriteSize(false)].toLowerCase();
-    }
-    return graphicsFile;
-}
-function findClosestSpriteSize(roundUp) {
-    for (let i = 0; i < settings.worldBlockSpriteSizes.length; i++) {
-        if (blockSize >= settings.worldBlockSpriteSizes[i]) {
-            if (i > 0 && roundUp) {
-                return i-1;
-            } else {
-                return i;
-            }
-        }
-    }
-    return settings.worldBlockSpriteSizes.length - 1;  // blockSize < settings.worldBlockSpriteSizes[settings.worldBlockSpriteSizes.length - 1]
-}
+const blockFillScale = 0.01;  // percentage of blockSize (in each direction)
 
 class Game {
     constructor(save) {
@@ -44,7 +26,8 @@ class Game {
         this.world = new World(worldSave);
         this.player = new Player(this.world, playerSave);
         this.playerScreenPos = new AVector(canvas.width/2, canvas.height/2);
-        loadItemSprites(this.world, true);
+
+        loadGraphics();
 
         this.sun = {  // todo sun on screen top, shift up/down in certain range by player y position in world, move to right (and on (-x^2)?)
             pos: new AVector(0, 0),
@@ -116,7 +99,7 @@ class Game {
                         this.swingAngle[0] = this.swingAngle[2] + (this.swingLeft ? Math.PI/2 : 0);
                     }
                     // logic
-                    if (this.world.blockGrid[blockUnderMouse.x][blockUnderMouse.y].id !== 0) {
+                    if (this.world.blockGrid[blockUnderMouse.x][blockUnderMouse.y].id !== "air") {
                         // break within building range
                         if (this.player.pos.y - blockUnderMouse.y - 1 <= this.player.range[0] + this.player.inventory[this.player.hotbarSelection][0].toolRangeAdd &&
                             blockUnderMouse.y - this.player.pos.y <= this.player.range[1] + this.player.inventory[this.player.hotbarSelection][0].toolRangeAdd &&
@@ -128,21 +111,22 @@ class Game {
                     }
                 }
                 // place block
-                else if (this.player.inventory[this.player.hotbarSelection][0].id <= BLOCKS_NUMBER) {
+                else if (this.player.inventory[this.player.hotbarSelection][0].isBlock) {
+                    console.log(this.player.inventory[this.player.hotbarSelection][0].id)
                     // do not place outside bounds or on solid block
                     if (blockUnderMouse.x >= 0 && blockUnderMouse.x < worldSize.x &&
                         blockUnderMouse.y >= 0 && blockUnderMouse.y < worldSize.y &&
-                        this.world.blockGrid[blockUnderMouse.x][blockUnderMouse.y].id === 0) {
+                        this.world.blockGrid[blockUnderMouse.x][blockUnderMouse.y].id === "air") {
                         // place within building range
                         if (this.player.pos.y - blockUnderMouse.y - 1 <= this.player.range[0] &&
                             blockUnderMouse.y - this.player.pos.y <= this.player.range[1] &&
                             this.player.pos.x - blockUnderMouse.x - 1 <= this.player.range[2] &&
                             blockUnderMouse.x - this.player.pos.x <= this.player.range[2]) {
                             // do not place mid-air
-                            if ((blockUnderMouse.x > 0 && this.world.blockGrid[blockUnderMouse.x-1][blockUnderMouse.y].id !== 0) ||
-                                (blockUnderMouse.x < worldSize.x-1 && this.world.blockGrid[blockUnderMouse.x+1][blockUnderMouse.y].id !== 0) ||
-                                (blockUnderMouse.y > 0 && this.world.blockGrid[blockUnderMouse.x][blockUnderMouse.y-1].id !== 0) ||
-                                (blockUnderMouse.y < worldSize.y-1 && this.world.blockGrid[blockUnderMouse.x][blockUnderMouse.y+1].id !== 0)) {
+                            if ((blockUnderMouse.x > 0 && this.world.blockGrid[blockUnderMouse.x-1][blockUnderMouse.y].id !== "air") ||
+                                (blockUnderMouse.x < worldSize.x-1 && this.world.blockGrid[blockUnderMouse.x+1][blockUnderMouse.y].id !== "air") ||
+                                (blockUnderMouse.y > 0 && this.world.blockGrid[blockUnderMouse.x][blockUnderMouse.y-1].id !== "air") ||
+                                (blockUnderMouse.y < worldSize.y-1 && this.world.blockGrid[blockUnderMouse.x][blockUnderMouse.y+1].id !== "air")) {
                                 // do not place on player
                                 if ((Math.abs(this.player.pos.x - blockUnderMouse.x) >= this.player.radius &&
                                      Math.abs(this.player.pos.x - blockUnderMouse.x - 1) >= this.player.radius) ||
@@ -200,7 +184,7 @@ class Game {
              x <= Math.min(worldSize.x-1, Math.floor(this.player.pos.x + (canvas.width-this.playerScreenPos.x)/blockSize)); x++) {
             for (let y = Math.max(0, Math.floor(this.player.pos.y - this.playerScreenPos.y/blockSize));
                  y <= Math.min(worldSize.y-1, Math.floor(this.player.pos.y + (canvas.height-this.playerScreenPos.y)/blockSize)); y++) {
-                if (this.world.blockGrid[x][y].id !== 0) {
+                if (this.world.blockGrid[x][y].id !== "air") {
                     // save and restore drain FPS heavily!
                     cx.translate(this.playerScreenPos.x + (x - this.player.pos.x) * blockSize, this.playerScreenPos.y + (y - this.player.pos.y) * blockSize);
                     if (this.world.blockGrid[x][y].light <= 0) {
@@ -208,14 +192,14 @@ class Game {
                         cx.fillStyle = "black";
                         cx.fillRect(-blockFillScale * blockSize, -blockFillScale * blockSize, blockSize * (1+blockFillScale), blockSize * (1+blockFillScale));
                     } else {
-                            // draw rect, not sprite
+                            // todo maybe add performance option: draw rect, not sprite
                             //cx.fillStyle = this.world.blockGrid[x][y].particleColors[0];
                             //cx.fillRect(-blockFillScale * blockSize, -blockFillScale * blockSize, blockSize * (1+blockFillScale), blockSize * (1+blockFillScale));
                         // block sprite
-                        cx.drawImage(this.world.blockSprites[this.world.blockGrid[x][y].id - 1][this.world.blockGrid[x][y].useSprite], 0, 0, blockSize, blockSize);
-                        // break animation sprite
+                        cx.drawImage(blockSprites[this.world.blockGrid[x][y].id][this.world.blockGrid[x][y].useSprite], 0, 0, blockSize, blockSize);
+                        // block destruction sprite
                         if (this.world.blockGrid[x][y].broken > 0) {
-                            cx.drawImage(this.world.blockDestructionSprites[Math.ceil(this.world.blockGrid[x][y].broken / this.world.blockDestructionSprites.length) - 1], 0, 0, blockSize, blockSize);
+                            cx.drawImage(blockDestructionSprites[Math.ceil(this.world.blockGrid[x][y].broken / blockDestructionSprites.length) - 1], 0, 0, blockSize, blockSize);
                         }
                         // light/shadow
                         if (this.world.blockGrid[x][y].light < 1) {
@@ -238,7 +222,7 @@ class Game {
         if (this.swingTool) {
             cx.translate(this.playerScreenPos.x + (this.swingLeft ? -1 : 1) * this.player.radius*blockSize/3, this.playerScreenPos.y);
             cx.rotate(this.swingLeft ? Math.PI - this.swingAngle[0] : this.swingAngle[0]);
-            cx.drawImage(itemSprites[this.player.inventory[this.player.hotbarSelection][0].id - BLOCKS_NUMBER - 1], 0, 0, this.useItemDrawSize * blockSize, this.useItemDrawSize * blockSize);
+            cx.drawImage(itemSprites[this.player.inventory[this.player.hotbarSelection][0].id], 0, 0, this.useItemDrawSize * blockSize, this.useItemDrawSize * blockSize);
             // translate back
             cx.rotate(-(this.swingLeft ? Math.PI - this.swingAngle[0] : this.swingAngle[0]));
             cx.translate(-(this.playerScreenPos.x + (this.swingLeft ? -1 : 1) * this.player.radius*blockSize/3), -this.playerScreenPos.y);
@@ -280,18 +264,18 @@ class Game {
                         sc(3+ this.drawInventory.yOffset + j * (this.drawInventory.size + this.drawInventory.space), settings.uiScaleChoice));
                 }
                 // items in inventory
-                if (this.player.inventory[i][j].id !== 0) {
-                    if (this.player.inventory[i][j].id <= BLOCKS_NUMBER) {  // item is block
-                        cx.drawImage(this.world.blockSprites[this.player.inventory[i][j].id - 1][0],
+                if (this.player.inventory[i][j].id !== INVENTORY_EMPTY) {
+                    if (this.player.inventory[i][j].isBlock) {  // item has sprite in blockSprites
+                        cx.drawImage(blockSprites[this.player.inventory[i][j].id][0],
                             sc(this.drawInventory.xOffset + i * (this.drawInventory.size + this.drawInventory.space), settings.uiScaleChoice) + sc((1 - this.drawInventory.blockScale) * this.drawInventory.size/2, settings.uiScaleChoice),
                             sc(this.drawInventory.yOffset + j * (this.drawInventory.size + this.drawInventory.space), settings.uiScaleChoice) + sc((1 - this.drawInventory.blockScale) * this.drawInventory.size/2, settings.uiScaleChoice),
                             sc(this.drawInventory.size, settings.uiScaleChoice * this.drawInventory.blockScale), sc(this.drawInventory.size, settings.uiScaleChoice * this.drawInventory.blockScale));
-                    } else {  // item is tool etc.
+                    } else {  // item has sprite in itemSprites
                         cx.translate(
                             sc(this.drawInventory.xOffset + i * (this.drawInventory.size + this.drawInventory.space), settings.uiScaleChoice) + sc((1 - this.drawInventory.itemScale) * this.drawInventory.size/2, settings.uiScaleChoice),
                             sc(this.drawInventory.yOffset + j * (this.drawInventory.size + this.drawInventory.space), settings.uiScaleChoice) + sc((1 + this.drawInventory.itemScale) * this.drawInventory.size/2, settings.uiScaleChoice));
                         cx.rotate(-Math.PI/2);
-                        cx.drawImage(itemSprites[this.player.inventory[i][j].id - BLOCKS_NUMBER - 1],
+                        cx.drawImage(itemSprites[this.player.inventory[i][j].id],
                             0, 0, sc(this.drawInventory.size, settings.uiScaleChoice * this.drawInventory.itemScale), sc(this.drawInventory.size, settings.uiScaleChoice * this.drawInventory.itemScale));
                         // translate back
                         cx.rotate(Math.PI/2);

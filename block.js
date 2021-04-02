@@ -26,10 +26,11 @@ class Block {
     constructor(id, spriteType=0) {
         this.id = id;
         this.standard();
+
         // lighting
         this.light = 0;
         this.lightEmission = [0, 0];
-        this.prevLightEmission = ["-", 0];  // [0] must not be a number
+        this.prevLightEmission = ["-", 0];  // first element must not be a number
 
         this.useSprite = spriteType;
         this.particles = [];
@@ -37,6 +38,7 @@ class Block {
     }
 
     standard() {
+        this.displayName = "x";
         this.broken = 0;  // [0;100]
         this.breakResistance = 1;
         this.useSprite = 0;
@@ -45,7 +47,7 @@ class Block {
     break(value) {
         this.broken += value / this.breakResistance;
         if (this.broken >= 100) {
-            this.turnToBlock(0);
+            this.turnToBlock("air");
         }
         // todo add particles based on value (/breakResistance?)
     }
@@ -53,7 +55,7 @@ class Block {
     turnToBlock(id) {
         this.id = id;
         this.standard();
-        // lighting
+        // lighting (keep old values as prev!)
         this.prevLightEmission = this.lightEmission.slice();
         this.lightEmission = [0, 0];  // standard (overridden by e.g. air)
         this.BLOCKS();
@@ -68,23 +70,18 @@ class Block {
         return false;
     }
 
-    setupBlock(particleColors) {
+    setupBlock(displayName, particleColors) {
+        this.displayName = displayName;
         this.particleColors = particleColors;
     }
 
     BLOCKS() {
         switch (this.id) {
-            // air
-            case 0: this.lightEmission = [1, 4]; break;
-            // dirt
-            case 1: this.setupBlock(["rgb(109,73,50)"]); break;
-            // stone
-            case 2: this.setupBlock(["rgb(119,119,119)"]); this.breakResistance = 1.8; break;
-            // orange test block
-            case 3: this.setupBlock(["rgb(255,124,39)"]); this.breakResistance = 0.3; break;
-            // purple test block
-            case 4: this.setupBlock(["rgb(168,54,255)"]); this.breakResistance = 0.8; break;
+            case "air": this.lightEmission = [1.2, 5]; break;
+            case "dirt": this.setupBlock("Dirt", ["rgb(109,73,50)"]); break;
+            case "stone": this.setupBlock("Stone", ["rgb(119,119,119)"]); this.breakResistance = 1.8; break;
+            case "testBlock1": this.setupBlock("T1", ["rgb(255,124,39)"]); this.breakResistance = 0.3; break;
+            case "testBlock2": this.setupBlock("T2", ["rgb(168,54,255)"]); this.breakResistance = 0.8; break;
         }
     }
 }
-const BLOCKS_SPRITE_VARIATIONS = [2, 1, 1, 1];

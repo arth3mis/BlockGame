@@ -11,15 +11,10 @@ const worldTime = {
     sunset: [0.5417, 0.6042],  // 19:00 - 20:30
 }
 
+// world lighting values
 let lightBaseValue = 0.25;
 const lightThreshold = 0.06;
 const lightRoundToZero = 1e-6;
-
-const saveFileLowestSupportedVersion = 7;
-function checkSaveFile(versionLine) {
-    let v = parseInt(versionLine);
-    return v >= saveFileLowestSupportedVersion;
-}
 
 class World {
     constructor(save) {
@@ -34,31 +29,6 @@ class World {
         this.background.addColorStop(0, "rgb(91,168,217)");
         this.background.addColorStop(0.4, "rgb(75,137,177)");
         this.background.addColorStop(1, "rgb(67,123,159)");
-
-        this.loadedGraphics = null;
-        this.blockSprites = new Array(BLOCKS_NUMBER);
-        this.blockDestructionSprites = new Array(10);
-        this.loadBlockSprites();
-    }
-
-    loadBlockSprites() {  // todo move to game.js
-        let graphicsFile = getChosenGraphicsFile();
-        if (graphicsFile === this.loadedGraphics) {  // chosen graphics are already loaded
-            return;
-        }
-        this.loadedGraphics = graphicsFile;
-
-        for (let i = 0; i < BLOCKS_NUMBER; i++) {
-            this.blockSprites[i] = [];
-            for (let j = 0; j < BLOCKS_SPRITE_VARIATIONS[i]; j++) {
-                this.blockSprites[i].push(new Image());
-                this.blockSprites[i][j].src = resPath + "b" + (i+1) + "/" + j + "/" + graphicsFile + resFileType;
-            }
-        }
-        for (let i = 0; i < this.blockDestructionSprites.length; i++) {
-            this.blockDestructionSprites[i] = new Image();
-            this.blockDestructionSprites[i].src = resPath + "bDestroy/" + i + "/" + graphicsFile + resFileType;
-        }
     }
 
     update(T) {
@@ -115,7 +85,7 @@ class World {
             this.blockGrid[x] = new Array(worldSize.y);
             s = save[preBlockDataLines + x].split(saveSeparator);
             for (let y = 0; y < worldSize.y; y++) {
-                this.blockGrid[x][y] = new Block(parseInt(s[y].split(saveSeparator2)[0]), parseInt(s[y].split(saveSeparator2)[1]));
+                this.blockGrid[x][y] = new Block(s[y].split(saveSeparator2)[0], parseInt(s[y].split(saveSeparator2)[1]));
             }
         }
     }
@@ -142,7 +112,7 @@ class World {
 
         // TEST FOR HEIGHTMAP
         this.seed = 2; // Seed
-        this.smoothness = 50; // Smoothes with neighboring elements of Height Map
+        this.smoothness = 50; // Smoothens with neighboring elements of Height Map
         this.heightMap = new Array(worldSize.x);
         this.stoneLevel = new Array(worldSize.x);
 
@@ -174,7 +144,7 @@ class World {
             this.blockGrid[i] = new Array(worldSize.y);
             for (let j = 0; j < worldSize.y; j++) {
                 if (j === this.heightMap[i]) {
-                    this.blockGrid[i][j] = new Block(1, 1);
+                    this.blockGrid[i][j] = new Block("dirt", 1);
                 } else if (j > this.heightMap[i]) {
                     let type;
                     if (j > this.stoneLevel[i]) {
@@ -182,9 +152,9 @@ class World {
                     } else {
                         type = 1;
                     }
-                    this.blockGrid[i][j] = new Block(type);
+                    this.blockGrid[i][j] = new Block(type === 2 ? "stone" : "dirt");
                 } else {
-                    this.blockGrid[i][j] = new Block(0);
+                    this.blockGrid[i][j] = new Block("air");
                 }
             }
         }

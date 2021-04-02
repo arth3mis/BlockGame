@@ -109,11 +109,10 @@ class Settings {
                         // update player onscreen position for background drawing
                         if (gameInstance != null) {
                             gameInstance.setPlayerScreenPos();
-                            // update graphics when auto (necessity is checked in loadSprites)
-                            if (settings.graphicsChoice === settings.worldBlockSpriteSizes.length) {
-                                gameInstance.world.loadBlockSprites();
-                                loadItemSprites(gameInstance.world);
-                            }
+                        }
+                        // update graphics when auto (necessity is checked in loadSprites)
+                        if (settings.graphicsChoice === settings.worldBlockSpriteSizes.length) {
+                            loadGraphics();
                         }
                         this.title = "Current: " + settings.dimension.x + "x" + settings.dimension.y;
                         break;
@@ -124,10 +123,7 @@ class Settings {
                             break;
                         }
                         settings.graphicsChoice = this.buttonHovered;
-                        if (gameInstance != null) {
-                            gameInstance.world.loadBlockSprites();
-                            loadItemSprites(gameInstance.world);
-                        }
+                        loadGraphics();
                         this.title = "Current: " + settings.graphicsRange[settings.graphicsChoice].replace(" (recommended)", "");
                         break;
                     // keybindings
@@ -149,11 +145,10 @@ class Settings {
                         // update player onscreen position for background drawing
                         if (gameInstance != null) {
                             gameInstance.setPlayerScreenPos();
-                            // update graphics when auto (necessity is checked in loadSprites)
-                            if (settings.graphicsChoice === settings.worldBlockSpriteSizes.length) {
-                                gameInstance.world.loadBlockSprites();
-                                loadItemSprites(gameInstance.world);
-                            }
+                        }
+                        // update graphics when auto (necessity is checked in loadSprites)
+                        if (settings.graphicsChoice === settings.worldBlockSpriteSizes.length) {
+                            loadGraphics();
                         }
                         this.title = "Current: " + Math.round((1 + settings.zoomFactorChoice)*10)/10;
                         break;
